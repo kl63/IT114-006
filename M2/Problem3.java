@@ -1,3 +1,7 @@
+/* Date: 2/1/2023
+ * UCID#: 31555276
+ * Comments: Homework 2
+ */
 package M2;
 
 import java.util.Arrays;
@@ -27,13 +31,14 @@ public class Problem3 {
             if(arr[i] instanceof Double){
                 output[i] = Math.abs((Double)arr[i]);
             }else if(arr[i] instanceof String){
-                /*output[i] = arr[i].toString();*/
                 output[i] = Math.abs(Integer.parseInt((String) arr[i]));
                 output[i] = output[i].toString();
                 
             }else
                 output[i] = Math.abs((Integer)arr[i]);
                 
+
+
             
                 
    
