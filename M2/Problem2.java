@@ -26,7 +26,6 @@ public class Problem2 {
        
         //set the double to a string variable
         totalOutput = String.format("%.02f", total);
-        /*totalOutput = total+"";*/
         //end add/edit section
         System.out.println("Total is " + totalOutput);
         System.out.println("End process");
