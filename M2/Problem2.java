@@ -20,9 +20,13 @@ public class Problem2 {
         double total = 0;
         String totalOutput = "";
         //TODO add/edit code here
+        for( int i = 0; i < arr.length; i++){
+            total += arr[i];
+        }
        
         //set the double to a string variable
-        totalOutput = total+"";
+        totalOutput = String.format("%.02f", total);
+        /*totalOutput = total+"";*/
         //end add/edit section
         System.out.println("Total is " + totalOutput);
         System.out.println("End process");
