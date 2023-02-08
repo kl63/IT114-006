@@ -148,21 +148,20 @@ public class NumberGuesser4 {
         }
         //IF STATEMENT FOR HIGHER OR LOWER ---------------------------------------------------
         //IF STATEMENT FOR RANGE -------------------------------------------------------------
-            if (range <= 2 && range != 0){
-                System.out.println("HINT #2:You are: HOT\n_____________");
-            }
-            else if(range <= 5 && range != 0){
-                System.out.println("HINT #2:You are: WARM\n_____________");
-            }
-
-            else if (range <= 10&& range != 0){
-                System.out.println("HINT #2:You are: COLD\n_____________");
-            }
-            else if (range >= 11 && range != 0){
-                System.out.println("HINT #2:You are: VERY COLD\n_____________");
-            }
+        if (range <= 2 && range != 0){
+            System.out.println("HINT #2:You are: HOT\n_____________");
         }
-        //If STATEMENT FOR RANGE -------------------------------------------------------------
+        else if(range <= 5 && range != 0){
+            System.out.println("HINT #2:You are: WARM\n_____________");
+        }
+
+        else if (range <= 10 && range != 0){
+            System.out.println("HINT #2:You are: COLD\n_____________");
+        }
+        else if (range >= 11 && range != 0){
+            System.out.println("HINT #2:You are: VERY COLD\n_____________");
+        }         
+        }
 
 
     
