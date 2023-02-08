@@ -134,6 +134,11 @@ public class NumberGuesser4 {
                 pickNewRandom = true;
             }
         }
+        /*
+        * Name: Kevin Lin
+        * UCID#: 31555276
+        * Comments: Implemented two hints into the Number Guesser Game.
+        */
         //IF STATEMENT FOR HIGHER OR LOWER ----------------------------------------------------
         int range;
         range = 0;
@@ -147,6 +152,11 @@ public class NumberGuesser4 {
             System.out.println("_____________\nHINT #1:The number is: HIGHER.");
         }
         //IF STATEMENT FOR HIGHER OR LOWER ---------------------------------------------------
+        /*
+         * Name: Kevin Lin
+         * UCID#: 31555276
+         * Comments: Implemented two hints into the Number Guesser Game.
+         */
         //IF STATEMENT FOR RANGE -------------------------------------------------------------
         if (range <= 2 && range != 0){
             System.out.println("HINT #2:You are: HOT\n_____________");
