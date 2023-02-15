@@ -6,6 +6,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
 
 public class Server {
     int port = 3001;
@@ -17,12 +19,15 @@ public class Server {
         // server listening
         try (ServerSocket serverSocket = new ServerSocket(port);) {
             Socket incoming_client = null;
+            //PlayGames();
             System.out.println("Server is listening on port " + port);
             do {
                 System.out.println("waiting for next client");
+    
                 if (incoming_client != null) {
                     System.out.println("Client connected");
                     ServerThread sClient = new ServerThread(incoming_client, this);
+                    //PlayGames();
                     
                     clients.add(sClient);
                     sClient.start();
@@ -69,6 +74,7 @@ public class Server {
 
     private boolean processCommand(String message, long clientId){
         System.out.println("Checking command: " + message);
+        //PlayGames();
         if(message.equalsIgnoreCase("disconnect")){
             Iterator<ServerThread> it = clients.iterator();
             while (it.hasNext()) {
@@ -81,9 +87,40 @@ public class Server {
                 }
             }
             return true;
+        } else if(message.equalsIgnoreCase("coin")){
+            broadcast(Flipper(), clientId);
+        }else if(message.equalsIgnoreCase("number")){
+            broadcast(Number(), clientId);
         }
         return false;
     }
+
+
+    
+
+public String Flipper(){
+    System.out.println("Welcome to Coin Flip");
+    Random random = new Random();
+    String results;
+    int number = random.nextInt(1)+1;
+    if(number == 0)
+        results = "Heads";
+    else
+        results = "Tails";
+    return "The results is: " + results;
+}
+
+
+
+public String Number(){
+    System.out.println("Welcome to Number Guesser (1-10)");
+    
+    Random random = new Random();
+    int number = random.nextInt(10)+1;
+    return "The random number was:  " + number;
+}
+
+
     public static void main(String[] args) {
         System.out.println("Starting Server");
         Server server = new Server();
