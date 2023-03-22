@@ -70,7 +70,6 @@ public class Server {
     private boolean processCommand(String message, long clientId){
         System.out.println("Checking command: " + message);
         if(message.equalsIgnoreCase("disconnect")){
-
             Iterator<ServerThread> it = clients.iterator();
             while (it.hasNext()) {
                 ServerThread client = it.next();
@@ -79,8 +78,6 @@ public class Server {
                     disconnect(client);
                     
                     break;
-                }else if(message.equalsIgnoreCase("games")){
-                    broadcast(play, clientId);
                 }
             }
             return true;
