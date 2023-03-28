@@ -23,6 +23,7 @@ public class Payload implements Serializable {
      * Who the payload is from
      */
     private String clientName;
+    private String choice; //EDIT 3/27
 
     public String getClientName() {
         return clientName;
@@ -30,6 +31,13 @@ public class Payload implements Serializable {
 
     public void setClientName(String clientName) {
         this.clientName = clientName;
+    }
+    public void setChoice(String choic, long clientId){ //EDITED 3/27
+        this.choice = choice;
+        this.clientId = clientId;
+    }
+    public String getChoice(){ //EDITED 3/27
+        return choice;
     }
 
     private long clientId;

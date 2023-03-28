@@ -19,6 +19,7 @@ import RPS.common.RoomResultPayload;
 public class ServerThread extends Thread {
     protected Socket client;
     private String clientName;
+    private String choice; //EDITED 3/27
     private boolean isRunning = false;
     private ObjectOutputStream out;// exposed here for send()
     // private Server server;// ref to our server so we can call methods on it
@@ -46,7 +47,12 @@ public class ServerThread extends Thread {
         this.currentRoom = room;
 
     }
-
+    protected void setChoice(String pick){ //EDITED 3/27
+        choice = pick;
+    }
+    public String getChoice(){ //EDITED 3/27
+        return choice;
+    }
     protected void setClientName(String name) {
         if (name == null || name.isBlank()) {
             logger.warning("Invalid name being set");
@@ -79,6 +85,13 @@ public class ServerThread extends Thread {
     }
 
     // send methods
+    public boolean sendChoice(String choice, long clientId) { //EDITED 3/27
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.CHOICE);
+        p.setChoice(choice, clientId);
+        p.getClientId();
+        return send(p);
+    }
     public boolean sendPhaseSync(Phase phase) {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.PHASE);
@@ -229,6 +242,12 @@ public class ServerThread extends Thread {
                     e.printStackTrace();
                 }
                 break;
+            case CHOICE: //EDITED 3/27
+                setChoice(p.getChoice());
+                break;
+            case SKIP: //EDITED 3/27
+
+                break;        
             default:
                 break;
 

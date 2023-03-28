@@ -12,12 +12,18 @@ public class GameRoom extends Room {
     Phase currentPhase = Phase.READY;
     private static Logger logger = Logger.getLogger(GameRoom.class.getName());
     private TimedEvent readyTimer = null;
+    private String choice; //EDITED 3/28
     private ConcurrentHashMap<Long, ServerPlayer> players = new ConcurrentHashMap<Long, ServerPlayer>();
 
     public GameRoom(String name) {
         super(name);
     }
-
+    protected void setChoice(String pick){ //EDITED 3/28
+        choice = pick;
+    }
+    public String getChoice(){ //EDITED 3/28
+        return choice;
+    }
     @Override
     protected void addClient(ServerThread client) {
         logger.info("Adding client as player");
@@ -86,7 +92,7 @@ public class GameRoom extends Room {
         new TimedEvent(30, () -> resetSession())
                 .setTickCallback((time) -> {
                     sendMessage(null, String.format("Example running session, time remaining: %s", time));
-                });
+                }); 
     }
 
     private synchronized void resetSession() {

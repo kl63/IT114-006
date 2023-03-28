@@ -139,7 +139,15 @@ public enum Client {
             return true;
         } else if (isName(text)) {
             return true;
-        } else if (text.startsWith("/joinroom")) {
+        } else if (text.startsWith("/choice")) { //EDITED 3/27
+            String choice = text.replace("/choice", "").trim();
+            sendChoice(choice);
+            return true;
+        }else if (text.startsWith("/skip")) { //EDITED 3/27
+            String skip = text.replace("/skip", "").trim();
+            sendSkip();
+            return true;
+        }else if (text.startsWith("/joinroom")) {
             String roomName = text.replace("/joinroom", "").trim();
             sendJoinRoom(roomName);
             return true;
@@ -169,6 +177,17 @@ public enum Client {
     }
 
     // Send methods
+    protected void sendChoice(String choice) throws IOException { //EDITED 3/27
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.CHOICE);
+        p.setMessage(choice);
+        out.writeObject(p);
+    }
+    protected void sendSkip() throws IOException { //EDITED 3/27
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.SKIP);
+        out.writeObject(p);
+    }
     protected void sendReadyStatus() throws IOException {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.READY);
@@ -355,6 +374,9 @@ public enum Client {
                 break;
             case PHASE:
                 System.out.println(String.format("The current phase is %s", p.getMessage()));
+            case CHOICE: //EDITED 3/27
+            System.out.println(String.format("Player %s chosen %s",p.getClientId(),p.getChoice()));
+                break;    
             default:
                 logger.warning(String.format("Unhandled Payload type: %s", p.getPayloadType()));
                 break;
