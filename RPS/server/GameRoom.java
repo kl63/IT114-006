@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 
 import RPS.common.Constants;
 import RPS.common.Phase;
+import RPS.common.Player;
 import RPS.common.TimedEvent;
 
 public class GameRoom extends Room {
@@ -13,14 +14,23 @@ public class GameRoom extends Room {
     private static Logger logger = Logger.getLogger(GameRoom.class.getName());
     private TimedEvent readyTimer = null;
     private String choice; //EDITED 3/28
+    private int rounds = 0; //EDITED 3/29
     private ConcurrentHashMap<Long, ServerPlayer> players = new ConcurrentHashMap<Long, ServerPlayer>();
-
     public GameRoom(String name) {
         super(name);
     }
-    protected void setChoice(String pick){ //EDITED 3/28
-        choice = pick;
+    protected void setChoice(String pick) {
+        System.out.println("Testing");
+        String[] validChoices = {"R", "P", "S"};
+        for (String choice : validChoices) {
+            if (pick.equals(choice)) {
+                this.choice = pick;
+                return;
+            }
+        }
+        sendMessage(null,"Invalid choice: " + pick);
     }
+
     public String getChoice(){ //EDITED 3/28
         return choice;
     }
@@ -89,25 +99,38 @@ public class GameRoom extends Room {
     private void start() { //EDITED 3/28
         updatePhase(Phase.PICKING);
         // TODO example
-        sendMessage(null, "Choosing started please choice");
-        new TimedEvent(10, () -> outcome()); 
-                //.setTickCallback(() -> { 
+        sendMessage(null, "Choosing started please type R, P, or S");
+        new TimedEvent(15, () -> outcome());  
+                //.setTickCallback(() -> {  //TO FIX MILESTONE 3
                     sendMessage(null, String.format("Picking session, time remaining: %s" ));
-                    
+                    players.values().stream().forEach(p -> { //EDITED 3/29
+                        p.setChoice(choice);
+                    });
                 //});
     }
-    private void outcome(ServerThread client) { //EDITED 3/28 //TO FIX
+    private void outcome() { //EDITED 3/28-3/29 //TO FIX
         // TODO example
         updatePhase(Phase.OUTCOME);
         sendMessage(null, "Outcome Begin");
+        for(Player p: players.values()){ //EDITED 3/29
+            if (p.getChoice() == p.getChoice()) {
+                sendMessage(null, "It's a tie!");
+                updatePhase(Phase.READY);
+            }
+        };
+    //});
+        
 
         
-        players.values().stream().filter(p -> p.getClient().getClientId() == client.getClientId()).findFirst()
-                .ifPresent(p -> {
-                    p.setChoice(choice);
-                
-                
-            });
+        //players.values().stream().forEach(p -> { //EDITED 3/29
+                    //p.setChoice(choice);  
+
+         
+       // });
+        
+
+
+            
 
 
     }

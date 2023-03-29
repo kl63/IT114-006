@@ -343,10 +343,11 @@ public enum Client {
                 if (!userList.containsKey(p.getClientId())) {
                     userList.put(p.getClientId(), p.getClientName());
                 }
+                break;//EDITED 3/29
             case MESSAGE:
-                System.out.println(String.format("%s: %s",
+                System.out.println(Constants.ANSI_CYAN +String.format("%s: %s",
                         getClientNameById(p.getClientId()),
-                        p.getMessage()));
+                        p.getMessage())+ Constants.ANSI_RESET);
                 break;
             case CLIENT_ID:
                 if (myClientId == Constants.DEFAULT_CLIENT_ID) {
@@ -370,15 +371,16 @@ public enum Client {
                 userList.clear();
                 break;
             case READY:
-                System.out.println(String.format("Player %s is ready", getClientNameById(p.getClientId())));
+            System.out.println(String.format("Player %s is ready", getClientNameById(p.getClientId()))
+                        + Constants.ANSI_RESET); //EDITED 3/29
                 break;
             case PHASE:
-                System.out.println(String.format("The current phase is %s", p.getMessage()));
+                System.out.println(Constants.ANSI_YELLOW + String.format("The current phase is %s", p.getMessage())+ Constants.ANSI_RESET);// EDITED 3/29
             case CHOICE: //EDITED 3/27
-            System.out.println(String.format("Player %s chosen %s",p.getClientId(),p.getChoice()));
+            System.out.println(String.format(Constants.ANSI_GREEN + "Player %s chosen %s",p.getClientId(),p.getChoice()) + Constants.ANSI_RESET); // EDITED 3/29
                 break;    
             default:
-                logger.warning(String.format("Unhandled Payload type: %s", p.getPayloadType()));
+                logger.warning(Constants.ANSI_RED + String.format("Unhandled Payload type: %s", p.getPayloadType())+ Constants.ANSI_RESET); // EDITEd 3/29
                 break;
 
         }
