@@ -43,7 +43,7 @@ public class GameRoom extends Room {
         }
         if (readyTimer == null) {
             sendMessage(null, "Ready Check Initiated, 30 seconds to join");
-            readyTimer = new TimedEvent(30, () -> {
+            readyTimer = new TimedEvent(30, () ->  {//EDITED 3/28
                 readyTimer = null;
                 readyCheck(true);
             });
@@ -67,7 +67,7 @@ public class GameRoom extends Room {
         // 0).sum();
         long numReady = players.values().stream().filter(ServerPlayer::isReady).count();
         if (numReady >= Constants.MINIMUM_PLAYERS) {
-            updatePhase(Phase.IN_PROGRESS);
+            updatePhase(Phase.PICKING); //EDITED 3/28
             if (timerExpired) {
                 sendMessage(null, "Ready Timer expired, starting session");
             } else if (numReady >= players.size()) {
@@ -86,15 +86,37 @@ public class GameRoom extends Room {
         }
     }
 
-    private void start() {
+    private void start() { //EDITED 3/28
+        updatePhase(Phase.PICKING);
         // TODO example
-        sendMessage(null, "Session started");
-        new TimedEvent(30, () -> resetSession())
-                .setTickCallback((time) -> {
-                    sendMessage(null, String.format("Example running session, time remaining: %s", time));
-                }); 
+        sendMessage(null, "Choosing started please choice");
+        new TimedEvent(10, () -> outcome()); 
+                //.setTickCallback(() -> { 
+                    sendMessage(null, String.format("Picking session, time remaining: %s" ));
+                    
+                //});
     }
+    private void outcome(ServerThread client) { //EDITED 3/28 //TO FIX
+        // TODO example
+        updatePhase(Phase.OUTCOME);
+        sendMessage(null, "Outcome Begin");
 
+        
+        players.values().stream().filter(p -> p.getClient().getClientId() == client.getClientId()).findFirst()
+                .ifPresent(p -> {
+                    p.setChoice(choice);
+                
+                
+            });
+
+
+    }
+        
+        
+                    
+                    
+                 
+    
     private synchronized void resetSession() {
         players.values().stream().forEach(p -> p.setReady(false));
         updatePhase(Phase.READY);
