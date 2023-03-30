@@ -19,21 +19,35 @@ public class GameRoom extends Room {
     public GameRoom(String name) {
         super(name);
     }
-    protected void setChoice(String pick) {
-        System.out.println("Testing");
+    protected void setChoice(String pick, long clientId) { //EDITED 3/29
+        boolean checker = false;
         String[] validChoices = {"R", "P", "S"};
-        for (String choice : validChoices) {
-            if (pick.equals(choice)) {
-                this.choice = pick;
-                return;
-            }
-        }
-        sendMessage(null,"Invalid choice: " + pick);
-    }
+            for(String choice: validChoices){
+                if (choice.equals(pick)) {
+                   checker = true;
 
-    public String getChoice(){ //EDITED 3/28
-        return choice;
+                }
+                if (checker == false) {
+                    sendMessage(null, "Enter a valid response");
+                }else{
+                    Player player = players.get(clientId);
+                    if (player != null) {
+                    player.setChoice(pick);
+                }
+                
+                
+            }
+                
+
+            }
+        
+        
     }
+    
+        
+       
+ 
+
     @Override
     protected void addClient(ServerThread client) {
         logger.info("Adding client as player");
@@ -96,7 +110,7 @@ public class GameRoom extends Room {
         }
     }
 
-    private void start() { //EDITED 3/28
+    private void start() { //EDITED 3/28 TO FIX
         updatePhase(Phase.PICKING);
         // TODO example
         sendMessage(null, "Choosing started please type R, P, or S");
@@ -108,7 +122,7 @@ public class GameRoom extends Room {
                     });
                 //});
     }
-    private void outcome() { //EDITED 3/28-3/29 //TO FIX
+    private void outcome() { //EDITED 3/28-3/29 TO FIX
         // TODO example
         updatePhase(Phase.OUTCOME);
         sendMessage(null, "Outcome Begin");
@@ -118,28 +132,8 @@ public class GameRoom extends Room {
                 updatePhase(Phase.READY);
             }
         };
-    //});
-        
-
-        
-        //players.values().stream().forEach(p -> { //EDITED 3/29
-                    //p.setChoice(choice);  
-
-         
-       // });
-        
-
-
-            
-
-
     }
         
-        
-                    
-                    
-                 
-    
     private synchronized void resetSession() {
         players.values().stream().forEach(p -> p.setReady(false));
         updatePhase(Phase.READY);

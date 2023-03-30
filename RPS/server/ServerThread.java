@@ -19,7 +19,6 @@ import RPS.common.RoomResultPayload;
 public class ServerThread extends Thread {
     protected Socket client;
     private String clientName;
-    private String choice; //EDITED 3/27
     private boolean isRunning = false;
     private ObjectOutputStream out;// exposed here for send()
     // private Server server;// ref to our server so we can call methods on it
@@ -47,12 +46,12 @@ public class ServerThread extends Thread {
         this.currentRoom = room;
 
     }
-    protected void setChoice(String pick){ //EDITED 3/27
+    /*protected void setChoice(String pick){ //EDITED 3/27
         choice = pick;
     }
     public String getChoice(){ //EDITED 3/27
         return choice;
-    }
+    }*/
     protected void setClientName(String name) {
         if (name == null || name.isBlank()) {
             logger.warning("Invalid name being set");
@@ -243,7 +242,13 @@ public class ServerThread extends Thread {
                 }
                 break;
             case CHOICE: //EDITED 3/27
-                setChoice(p.getChoice());
+            try {
+                ((GameRoom)currentRoom).setChoice(p.getChoice(),myClientId); // EDITED 3/29
+            } catch (Exception e) {
+                logger.severe(String.format("There was a problem during setChoice %s", e.getMessage()));
+                    e.printStackTrace();
+            }
+                
                 break;
             case SKIP: //EDITED 3/27
 
