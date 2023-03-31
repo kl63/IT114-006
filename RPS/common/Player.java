@@ -18,5 +18,16 @@ public class Player {
     public  String getChoice(){ //EDITED 3/28
         return choice;
     }
+    private boolean isOut = false; //EDITED 3/30
+
+    public void setIsOut(boolean isOut) {
+        this.isOut = true;
+    }
+
+    public boolean isOut() {
+        return isOut;
+    }
+
+
 
 }

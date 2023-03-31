@@ -87,7 +87,8 @@ public class ServerThread extends Thread {
     public boolean sendChoice(String choice, long clientId) { //EDITED 3/27
         Payload p = new Payload();
         p.setPayloadType(PayloadType.CHOICE);
-        p.setChoice(choice, clientId);
+        p.setChoice(choice);
+        p.setClientId(clientId);
         p.getClientId();
         return send(p);
     }

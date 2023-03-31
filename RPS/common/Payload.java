@@ -32,9 +32,8 @@ public class Payload implements Serializable {
     public void setClientName(String clientName) {
         this.clientName = clientName;
     }
-    public void setChoice(String choic, long clientId){ //EDITED 3/27
+    public void setChoice(String choice){ //EDITED 3/27
         this.choice = choice;
-        this.clientId = clientId;
     }
     public String getChoice(){ //EDITED 3/27
         return choice;

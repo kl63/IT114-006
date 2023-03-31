@@ -180,7 +180,7 @@ public enum Client {
     protected void sendChoice(String choice) throws IOException { //EDITED 3/27
         Payload p = new Payload();
         p.setPayloadType(PayloadType.CHOICE);
-        p.setMessage(choice);
+        p.setChoice(choice); 
         out.writeObject(p);
     }
     protected void sendSkip() throws IOException { //EDITED 3/27
@@ -377,7 +377,15 @@ public enum Client {
             case PHASE:
                 System.out.println(Constants.ANSI_YELLOW + String.format("The current phase is %s", p.getMessage())+ Constants.ANSI_RESET);// EDITED 3/29
             case CHOICE: //EDITED 3/27
-            System.out.println(String.format(Constants.ANSI_GREEN + "Player %s chosen %s",p.getClientId(),p.getChoice()) + Constants.ANSI_RESET); // EDITED 3/29
+            try {// EDITED 3/30
+                System.out.println(String.format(Constants.ANSI_GREEN + "Player %s chosen %s",p.getClientId(),p.getChoice()) 
+                + Constants.ANSI_RESET); // EDITED 3/29
+            } catch (Exception e) {
+                // TODO: handle exception
+                logger.severe(Constants.ANSI_RED + String.format("Error handling position payload: %s", e)
+                            + Constants.ANSI_RESET);
+            }
+            //System.out.println(String.format(Constants.ANSI_GREEN + "Player %s chosen %s",p.getClientId(),p.getChoice()) + Constants.ANSI_RESET); // EDITED 3/29
                 break;    
             default:
                 logger.warning(Constants.ANSI_RED + String.format("Unhandled Payload type: %s", p.getPayloadType())+ Constants.ANSI_RESET); // EDITEd 3/29

@@ -1,6 +1,8 @@
 package RPS.server;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
@@ -15,6 +17,7 @@ public class GameRoom extends Room {
     private TimedEvent readyTimer = null;
     private String choice; //EDITED 3/28
     private int rounds = 0; //EDITED 3/29
+    private ServerPlayer currentPlayer; //EDITEd 3/30
     private ConcurrentHashMap<Long, ServerPlayer> players = new ConcurrentHashMap<Long, ServerPlayer>();
     public GameRoom(String name) {
         super(name);
@@ -22,27 +25,25 @@ public class GameRoom extends Room {
     protected void setChoice(String pick, long clientId) { //EDITED 3/29
         boolean checker = false;
         String[] validChoices = {"R", "P", "S"};
-            for(String choice: validChoices){
-                if (choice.equals(pick)) {
-                   checker = true;
-
-                }
-                if (checker == false) {
-                    sendMessage(null, "Enter a valid response");
-                }else{
-                    Player player = players.get(clientId);
-                    if (player != null) {
-                    player.setChoice(pick);
-                }
-                
-                
+        if(currentPhase != Phase.PICKING){
+            return;
+        }
+        for(String choice : validChoices){
+            if(choice.equals(pick)){
+                checker = true;
+                break;
             }
-                
-
+        }
+        if(checker == false){
+            sendMessage(null, "Enter a valid response");
+        }else{
+            Player player = players.get(clientId);
+            if (player != null) {
+                player.setChoice(pick);
+                sendMessage(null, clientId + " has chosen");
             }
-        
-        
-    }
+        }
+    }    
     
         
        
@@ -122,17 +123,38 @@ public class GameRoom extends Room {
                     });
                 //});
     }
-    private void outcome() { //EDITED 3/28-3/29 TO FIX
-        // TODO example
+    private void outcome() { //EDITED 3/28-3/29 
         updatePhase(Phase.OUTCOME);
-        sendMessage(null, "Outcome Begin");
-        for(Player p: players.values()){ //EDITED 3/29
-            if (p.getChoice() == p.getChoice()) {
+        List<ServerPlayer> winners = new ArrayList<>(); //EDITED 3/30
+        for (ServerPlayer p : players.values()) {
+            if (p.getChoice() == null) {
+                p.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID, "You did not make a choice. You lose.");
+                p.setIsOut(true);
+                syncIsOut(p.getClient().getClientId());
+            }
+            players.values().stream().filter(p.isReady() && p.getChoice() != null); // TODO 3/31
+            /*if (p.getChoice() == p.getChoice()) {
                 sendMessage(null, "It's a tie!");
                 updatePhase(Phase.READY);
-            }
+            }*/
         };
     }
+    /**
+     * Syncs to everyone that a specific client is out for a round
+     * 
+     * @param clientId
+     */
+    private void syncIsOut(long client) {
+        Iterator<ServerPlayer> iter = players.values().stream().iterator();
+        while (iter.hasNext()) {
+            ServerPlayer sp = iter.next();
+            if (sp != currentPlayer&& sp.getClient().getClientId() != currentPlayer.getClient().getClientId()) {
+                //boolean success = sp.getClient().sendOut(clientId);
+                //if (!success) {
+                    handleDisconnect(sp);
+                }
+            }
+        }
         
     private synchronized void resetSession() {
         players.values().stream().forEach(p -> p.setReady(false));
