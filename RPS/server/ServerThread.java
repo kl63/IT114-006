@@ -12,6 +12,7 @@ import RPS.common.Payload;
 import RPS.common.PayloadType;
 import RPS.common.Phase;
 import RPS.common.RoomResultPayload;
+import RPS.common.PointsPayload; //EDITED 3/31
 
 /**
  * A server-side representation of a single client
@@ -84,6 +85,13 @@ public class ServerThread extends Thread {
     }
 
     // send methods
+    public boolean sendPoints(int points) { //EDITED 3/31
+        PointsPayload p = new PointsPayload();
+        p.setPayloadType(PayloadType.POINTS);
+        p.setPoints(points);
+        p.getClientId();
+        return send(p);
+    }
     public boolean sendChoice(String choice, long clientId) { //EDITED 3/27
         Payload p = new Payload();
         p.setPayloadType(PayloadType.CHOICE);

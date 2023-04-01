@@ -5,11 +5,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
+import java.util.stream.Stream;
 
 import RPS.common.Constants;
 import RPS.common.Phase;
 import RPS.common.Player;
 import RPS.common.TimedEvent;
+import RPS.common.PointsPayload; //EDITED 3/31
 
 public class GameRoom extends Room {
     Phase currentPhase = Phase.READY;
@@ -17,7 +19,7 @@ public class GameRoom extends Room {
     private TimedEvent readyTimer = null;
     private String choice; //EDITED 3/28
     private int rounds = 0; //EDITED 3/29
-    private ServerPlayer currentPlayer; //EDITEd 3/30
+    private ServerPlayer currentPlayer; //EDITED 3/30
     private ConcurrentHashMap<Long, ServerPlayer> players = new ConcurrentHashMap<Long, ServerPlayer>();
     public GameRoom(String name) {
         super(name);
@@ -59,12 +61,28 @@ public class GameRoom extends Room {
             return player;
         });
     }
+    protected void setSkip(ServerThread client) { //EDITED 3/31
+        
+        logger.info("Player skipped");
+        if (currentPhase != Phase.PICKING) {
+            logger.warning(String.format("setSkip() incorrect phase: %s", Phase.PICKING.name()));
+            return;
+        }
+        Player player = players.get(client.getClientId());
+            if (player != null) {
+                player.setSkip(true);
+                sendMessage(null, client.getClientId() + " has skipped");
+            }
+                
+    }
+    
 
     protected void setReady(ServerThread client) {
         logger.info("Ready check triggered");
         if (currentPhase != Phase.READY) {
             logger.warning(String.format("readyCheck() incorrect phase: %s", Phase.READY.name()));
             return;
+            
         }
         if (readyTimer == null) {
             sendMessage(null, "Ready Check Initiated, 30 seconds to join");
@@ -111,7 +129,14 @@ public class GameRoom extends Room {
         }
     }
 
-    private void start() { //EDITED 3/28 TO FIX
+    private void start() { //EDITED 3/28 
+        players.values().stream().forEach(p -> {
+            p.setPoints(0);
+            p.setIsOut(false);
+            p.setChoice(null);
+                
+        
+        });
         updatePhase(Phase.PICKING);
         // TODO example
         sendMessage(null, "Choosing started please type R, P, or S");
@@ -132,13 +157,58 @@ public class GameRoom extends Room {
                 p.setIsOut(true);
                 syncIsOut(p.getClient().getClientId());
             }
-            players.values().stream().filter(p.isReady() && p.getChoice() != null); // TODO 3/31
-            /*if (p.getChoice() == p.getChoice()) {
-                sendMessage(null, "It's a tie!");
-                updatePhase(Phase.READY);
-            }*/
-        };
+            Stream<ServerPlayer> numReady = players.values().stream().filter(players -> p.isReady() && p.getChoice() != null); // EDITED 3/31
+            if(numReady.count() > 1){
+                
+                for(int i = 0; i < numReady.count(); i++){
+                    ServerPlayer playerA = (ServerPlayer) numReady.toArray()[i];
+                    ServerPlayer playerB = null;
+                    if( i+1 < numReady.count()){
+                         playerB = (ServerPlayer) numReady.toArray()[i+1];
+                    }else{
+                         playerB = (ServerPlayer) numReady.toArray()[0];
+                    }
+                    String choiceA = playerA.getChoice();
+                    String choiceB = playerB.getChoice();
+                    if(choiceA.equals(choiceB)){
+                        sendMessage(null, String.format("%s has tied with %s. %s chose %s and %s chose %s.",
+                        playerA.getClient().getClientName(), playerB.getClient().getClientName(),
+                        playerA.getClient().getClientName(), playerA.getChoice(),
+                        playerB.getClient().getClientName(), playerB.getChoice()));
+
+
+                        
+                        
+                        //GOAL: Make B lose
+                    }else if((choiceA.equalsIgnoreCase("R")) && choiceB.equalsIgnoreCase("S")|| 
+                             (choiceA.equalsIgnoreCase("P")) && choiceB.equalsIgnoreCase("R") ||
+                             (choiceA.equalsIgnoreCase("S")) && choiceB.equalsIgnoreCase("P")){
+                                playerA.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("%s has beaten %s."+
+                                "%s chose %s and %s chose %s.",
+                                playerA.getClient().getClientName(), playerB.getClient().getClientName(),
+                                playerA.getClient().getClientName(), playerA.getChoice(),
+                                playerB.getClient().getClientName(), playerB.getChoice()));
+                    }else{
+
+                    }
+                }
+                
+
+                }
+
+                
+            }
+        
     }
+
+            
+                 
+        
+    
+    
+
+    
+    
     /**
      * Syncs to everyone that a specific client is out for a round
      * 
@@ -160,6 +230,9 @@ public class GameRoom extends Room {
         players.values().stream().forEach(p -> p.setReady(false));
         updatePhase(Phase.READY);
         sendMessage(null, "Session ended, please intiate ready check to begin a new one");
+        players.values().stream().forEach(p -> {
+        p.setPoints(0); //EDITED 3/31
+    });
     }
 
     private void updatePhase(Phase phase) {

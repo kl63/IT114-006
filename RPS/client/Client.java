@@ -13,6 +13,7 @@ import java.util.logging.Logger;
 
 import RPS.common.Constants;
 import RPS.common.Payload;
+import RPS.common.PointsPayload; //EDITED 3/31
 import RPS.common.PayloadType;
 import RPS.common.RoomResultPayload;
 
@@ -385,8 +386,11 @@ public enum Client {
                 logger.severe(Constants.ANSI_RED + String.format("Error handling position payload: %s", e)
                             + Constants.ANSI_RESET);
             }
-            //System.out.println(String.format(Constants.ANSI_GREEN + "Player %s chosen %s",p.getClientId(),p.getChoice()) + Constants.ANSI_RESET); // EDITED 3/29
-                break;    
+            case POINTS: //EDITED 3/31
+            PointsPayload pt = (PointsPayload) p;
+
+
+                break;
             default:
                 logger.warning(Constants.ANSI_RED + String.format("Unhandled Payload type: %s", p.getPayloadType())+ Constants.ANSI_RESET); // EDITEd 3/29
                 break;

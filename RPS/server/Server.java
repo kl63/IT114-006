@@ -10,6 +10,7 @@ import java.util.Queue;
 import java.util.logging.Logger;
 
 import RPS.common.Constants;
+import RPS.common.PointsPayload; //EDITED 3/31
 
 public enum Server {
     INSTANCE;
