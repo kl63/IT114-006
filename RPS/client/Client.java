@@ -387,10 +387,13 @@ public enum Client {
                             + Constants.ANSI_RESET);
             }
             case POINTS: //EDITED 3/31
-            PointsPayload pt = (PointsPayload) p;
+            //PointsPayload pt = (PointsPayload) p;
 
 
                 break;
+            case OUT:
+                
+                break;   
             default:
                 logger.warning(Constants.ANSI_RED + String.format("Unhandled Payload type: %s", p.getPayloadType())+ Constants.ANSI_RESET); // EDITEd 3/29
                 break;

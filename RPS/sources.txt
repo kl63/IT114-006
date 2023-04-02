@@ -7,6 +7,7 @@
 ./common/TimedEvent.java
 ./common/RoomResultPayload.java
 ./common/Payload.java
+./common/PointsPayload.java
 ./common/Player.java
 ./common/PayloadType.java
 ./common/Constants.java

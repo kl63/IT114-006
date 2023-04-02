@@ -47,12 +47,15 @@ public class ServerThread extends Thread {
         this.currentRoom = room;
 
     }
-    /*protected void setChoice(String pick){ //EDITED 3/27
-        choice = pick;
-    }
-    public String getChoice(){ //EDITED 3/27
-        return choice;
-    }*/
+
+    /*
+     * protected void setChoice(String pick){ //EDITED 3/27
+     * choice = pick;
+     * }
+     * public String getChoice(){ //EDITED 3/27
+     * return choice;
+     * }
+     */
     protected void setClientName(String name) {
         if (name == null || name.isBlank()) {
             logger.warning("Invalid name being set");
@@ -85,14 +88,22 @@ public class ServerThread extends Thread {
     }
 
     // send methods
-    public boolean sendPoints(int points) { //EDITED 3/31
+    public boolean sendOut(long clientId) {
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.OUT);
+        p.setClientId(clientId);
+        return send(p);
+    }
+    
+    public boolean sendPoints(int points, long clientId) { // EDITED 3/31
         PointsPayload p = new PointsPayload();
         p.setPayloadType(PayloadType.POINTS);
         p.setPoints(points);
-        p.getClientId();
+        p.setClientId(clientId);
         return send(p);
     }
-    public boolean sendChoice(String choice, long clientId) { //EDITED 3/27
+
+    public boolean sendChoice(String choice, long clientId) { // EDITED 3/27
         Payload p = new Payload();
         p.setPayloadType(PayloadType.CHOICE);
         p.setChoice(choice);
@@ -100,6 +111,7 @@ public class ServerThread extends Thread {
         p.getClientId();
         return send(p);
     }
+
     public boolean sendPhaseSync(Phase phase) {
         Payload p = new Payload();
         p.setPayloadType(PayloadType.PHASE);
@@ -250,18 +262,24 @@ public class ServerThread extends Thread {
                     e.printStackTrace();
                 }
                 break;
-            case CHOICE: //EDITED 3/27
-            try {
-                ((GameRoom)currentRoom).setChoice(p.getChoice(),myClientId); // EDITED 3/29
-            } catch (Exception e) {
-                logger.severe(String.format("There was a problem during setChoice %s", e.getMessage()));
+            case CHOICE: // EDITED 3/27
+                try {
+                    ((GameRoom) currentRoom).setChoice(p.getChoice(), myClientId); // EDITED 3/29
+                } catch (Exception e) {
+                    logger.severe(String.format("There was a problem during setChoice %s", e.getMessage()));
                     e.printStackTrace();
-            }
-                
-                break;
-            case SKIP: //EDITED 3/27
+                }
 
-                break;        
+                break;
+            case SKIP: // EDITED 3/27
+                try {
+                    ((GameRoom) currentRoom).setSkip(this);
+                    ;
+                } catch (Exception e) {
+                    logger.severe(String.format("There was a problem during setSkip %s", e.getMessage()));
+                    e.printStackTrace();
+                }
+                break;
             default:
                 break;
 
