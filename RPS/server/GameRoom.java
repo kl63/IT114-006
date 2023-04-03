@@ -156,47 +156,65 @@ public class GameRoom extends Room {
 
     private void outcome() { // EDITED 3/28-3/29
         updatePhase(Phase.OUTCOME);
-        // List<ServerPlayer> winners = new ArrayList<>(); //EDITED 3/30
-        System.out.println("TESTING 1");
-        players.values().stream().filter(players -> players.getChoice() == null).forEach(p -> {
-            p.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID, "You did not make a choice. You lose.");
-            p.setIsOut(true);
-            syncIsOut(p.getClient().getClientId());
-        });
-        /*
-         * for (ServerPlayer p : players.values()) {
-         * if (p.getChoice() == null) {
-         * p.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID,
-         * "You did not make a choice. You lose.");
-         * p.setIsOut(true);
-         * syncIsOut(p.getClient().getClientId());
-         * continue;
-         * }
-         */
+        // System.out.println("TESTING 1");
+        players.values().stream().filter(players -> players.getChoice() == null && players.isOut() == true)
+                .forEach(p -> {
+                    p.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID, "You did not make a choice. You lose.");
+                    p.setIsOut(true);
+                    syncOut(p.getClient().getClientId());
+                });
+
+        for (ServerPlayer player : players.values()) {
+            // if (player.isReady() && player.getChoice() != null)
+            // System.out.println("People Testing: " + player.getChoice() + " and " +
+            // player.isReady());
+            System.out.println("People Testing:  " + players.values().stream().count());
+
+        }
         System.out.println("TESTING 2");
-        Stream<ServerPlayer> numReady = players.values().stream()
-                .filter(p -> p.isReady() && p.getChoice() != null); // EDITED 3/31
-                System.out.println("TESTING 2a: "+ numReady.count());
-        if (numReady.count() > 1) {
-            System.out.println("TESTING 2b: "+ numReady.count());
-            for (int i = 0; i < numReady.count(); i++) {
-                ServerPlayer playerA = (ServerPlayer) numReady.toArray()[i];
+
+        long numReadyCount = players.values().stream().filter(p -> p.isReady() && p.getChoice() != null) // EDITED 4/2
+                .count();
+
+        for (ServerPlayer player : players.values()) {
+            // if (player.isReady() && player.getChoice() != null)
+            System.out.println("People Testing:  " + player.getChoice() + " and " + player.isReady());
+            // System.out.println("People Testing: " + players.values().stream().count());
+
+        }
+        System.out.println("People Testing:  " + players.values().stream().count());
+
+        /*
+         * Stream<ServerPlayer> numReady = players.values().stream()
+         * .filter(p -> p.isReady() && p.getChoice() != null); // EDITED 3/31
+         */
+
+        System.out.println("TESTING 2a: " + numReadyCount);
+
+        List<ServerPlayer> numReady = (List<ServerPlayer>) players.values().stream().filter(p -> p.isReady()
+                && p.getChoice() != null).toList();
+        // Stream<ServerPlayer> numReady = players.values().stream() //EDITED 4/2
+        // .filter(p -> p.isReady() && p.getChoice() != null);
+        if (numReadyCount > 1) {
+            for (int i = 0; i < numReadyCount; i++) {
+                ServerPlayer playerA = (ServerPlayer) numReady.get(i);
                 ServerPlayer playerB = null;
-                if (i + 1 < numReady.count()) {
-                    playerB = (ServerPlayer) numReady.toArray()[i + 1];
+                if (i + 1 < numReadyCount) {
+                    playerB = (ServerPlayer) numReady.get(i + 1);
                 } else {
-                    playerB = (ServerPlayer) numReady.toArray()[0];
+                    playerB = (ServerPlayer) numReady.get(0);
                 }
-                players.values().stream().filter(p -> p.numReady.count()); //TO DO 4/2
+                
+                // players.values().stream().filter(ServerPlayer:: numReady); //TO DO 4/2
                 System.out.println("TESTING 2ba");
                 String choiceA = playerA.getChoice();
                 String choiceB = playerB.getChoice();
+
                 if (choiceA.equals(choiceB)) {
                     sendMessage(null, String.format("%s has tied with %s. %s chose %s and %s chose %s.",
                             playerA.getClient().getClientName(), playerB.getClient().getClientName(),
                             playerA.getClient().getClientName(), playerA.getChoice(),
                             playerB.getClient().getClientName(), playerB.getChoice()));
-
 
                     // GOAL: Make B lose
                     System.out.println("TESTING 2b");
@@ -211,11 +229,13 @@ public class GameRoom extends Room {
                     playerA.setPoints(5);
                     playerB.setIsOut(true);
 
-                } else {
+                } else if (((choiceA.equalsIgnoreCase("S")) && choiceB.equalsIgnoreCase("R") ||
+                        (choiceA.equalsIgnoreCase("R")) && choiceB.equalsIgnoreCase("P") ||
+                        (choiceA.equalsIgnoreCase("P")) && choiceB.equalsIgnoreCase("S"))) {
                     System.out.println("TESTING 2c");
-                    playerB.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("%s has beaten %s." +
+                    playerB.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("%s has lost to  %s." +
                             "%s chose %s and %s chose %s.",
-                            playerB.getClient().getClientName(), playerA.getClient().getClientName(),
+                            playerA.getClient().getClientName(), playerB.getClient().getClientName(),
                             playerB.getClient().getClientName(), playerB.getChoice(),
                             playerA.getClient().getClientName(), playerA.getChoice()));
                     playerB.setPoints(5);
@@ -228,15 +248,23 @@ public class GameRoom extends Room {
                 syncOut(players.getClient().getClientId());
 
             }
-        }
 
-        long numRemain = players.values().stream().filter(player -> !player.isOut()).count();
-        if (numRemain > 1) {
-            for (ServerPlayer player : players.values()) {
-                player.setChoice(null);
-                player.setSkip(false);
-            }
-            updatePhase(Phase.PICKING);
+            long numRemain = players.values().stream().filter(player -> !player.isOut()).count(); // TO DO 4/3
+            if (numRemain > 1) {
+                for (ServerPlayer player : players.values()) {
+                    player.setChoice(null);
+                    player.setSkip(false);
+                }
+                updatePhase(Phase.PICKING);
+            } else if (numRemain == 1) {
+                players.values().stream().filter(players -> players.getChoice() == null && players.isOut() == true)
+                        .forEach(p -> {
+                            p.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("%s has won the game",
+                                    p.getClient().getClientName()));
+
+                        });
+            } //END HERE
+
         } else {
             resetSession();
         }
@@ -259,7 +287,7 @@ public class GameRoom extends Room {
         Iterator<ServerPlayer> iter = players.values().stream().iterator();
         while (iter.hasNext()) {
             ServerPlayer client = iter.next();
-            client = iter.next();
+            // client = iter.next();
             boolean success = client.getClient().sendOut(clientId);
             if (!success) {
                 handleDisconnect(client);
