@@ -1,5 +1,10 @@
 package RPS.common;
 
+/*
+ * UCID#: 31555276
+ * DATE: 4/4/23
+ * COMMENTS: New playload types are PHASE, SKIP, CHOICE, POINTS, and OUT
+ */
 public enum PayloadType {
     CONNECT, DISCONNECT, MESSAGE, CLIENT_ID, RESET_USER_LIST,
     SYNC_CLIENT, CREATE_ROOM, JOIN_ROOM, GET_ROOMS,

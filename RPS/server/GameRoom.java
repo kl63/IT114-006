@@ -17,20 +17,24 @@ public class GameRoom extends Room {
     Phase currentPhase = Phase.READY;
     private static Logger logger = Logger.getLogger(GameRoom.class.getName());
     private TimedEvent readyTimer = null;
-    private String choice; 
-    private int rounds = 0; 
+    private String choice;
+    private int rounds = 0;
     private ConcurrentHashMap<Long, ServerPlayer> players = new ConcurrentHashMap<Long, ServerPlayer>();
 
     public GameRoom(String name) {
         super(name);
     }
 
-    protected void setChoice(String pick, long clientId) { 
+    protected void setChoice(String pick, long clientId) {
         boolean checker = false;
         String[] validChoices = { "R", "P", "S" };
         if (currentPhase != Phase.PICKING) {
             return;
         }
+        /*
+         * Checks player has picked one of the valid choices
+         * If false it will print line 43
+         */
         for (String choice : validChoices) {
             if (choice.equals(pick)) {
                 checker = true;
@@ -59,7 +63,7 @@ public class GameRoom extends Room {
         });
     }
 
-    protected void setSkip(ServerThread client) { 
+    protected void setSkip(ServerThread client) {
 
         logger.info("Player skipped");
         if (currentPhase != Phase.PICKING) {
@@ -107,7 +111,7 @@ public class GameRoom extends Room {
         // 0).sum();
         long numReady = players.values().stream().filter(ServerPlayer::isReady).count();
         if (numReady >= Constants.MINIMUM_PLAYERS) {
-            updatePhase(Phase.PICKING); 
+            updatePhase(Phase.PICKING);
             if (timerExpired) {
                 sendMessage(null, "Ready Timer expired, starting session");
             } else if (numReady >= players.size()) {
@@ -126,12 +130,12 @@ public class GameRoom extends Room {
         }
     }
 
-    private void start() { 
-        players.values().stream().forEach(p -> { 
+    private void start() {
+        players.values().stream().forEach(p -> {
             p.setPoints(0);
             p.setIsOut(false);
             p.setChoice(null);
-            p.setSkip(false); 
+            p.setSkip(false);
         });
         updatePhase(Phase.PICKING);
         sendMessage(null, "Choosing started please type R, P, or S");
@@ -140,11 +144,14 @@ public class GameRoom extends Room {
         // sendMessage(null, String.format("Picking session, time remaining: %s",
         // time));
         // });
-        
-        
-    }
 
-    private void outcome() { // EDITED 3/28-3/29
+    }
+    /*
+     * UCID#: 31555276
+     * DATE: 4/4/23
+     * COMMENT: Logic for not picking on time and skipping
+     */
+    private void outcome() {
         updatePhase(Phase.OUTCOME);
         players.values().stream()
                 .filter(players -> players.getChoice() == null && players.isOut() || players.isSkip() == true)
@@ -155,35 +162,19 @@ public class GameRoom extends Room {
                     syncOut(p.getClient().getClientId());
                 });
 
-
         long numReadyCount = players.values().stream().filter(p -> p.isReady() && p.getChoice() != null) // EDITED 4/2
                 .count();
 
         for (ServerPlayer player : players.values()) {
 
         }
-
         /*
-         * long numRemain = players.values().stream().filter(player -> player.isReady()
-         * && player.getChoice() == null && !player.isOut()).count(); //START HERE
-         * if (numRemain > 1) {
-         * for (ServerPlayer player : players.values()) {
-         * player.setChoice(null);
-         * player.setSkip(false);
-         * }
-         * updatePhase(Phase.PICKING);
-         * } else if (numRemain == 1) {
-         * players.values().stream().filter(players -> players.getChoice() == null &&
-         * players.isOut() == true)
-         * .forEach(p -> {
-         * p.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID,
-         * String.format("%s has won the game",
-         * p.getClient().getClientName()));
-         * 
-         * });
-         * }//END HERE
+         * UCID#: 31555276
+         * DATE: 4/4/23
+         * COMMENT: Logic for calculating winners (i.e., Player 1 vs Player 2 vs Player 3 vs Player 
+         * 1) Each player is compared against the following player; the last player is compared against 
+         * the first to complete the cycle.
          */
-
         List<ServerPlayer> numReady = (List<ServerPlayer>) players.values().stream().filter(p -> p.isReady()
                 && p.getChoice() != null).toList();
         if (numReadyCount > 1) {
@@ -195,20 +186,24 @@ public class GameRoom extends Room {
                 } else {
                     playerB = (ServerPlayer) numReady.get(0);
                 }
-                for (ServerPlayer player : players.values()) { 
-                    player.setChoice(null);
-                    player.setSkip(false);
-                }
+
                 String choiceA = playerA.getChoice();
                 String choiceB = playerB.getChoice();
+        /*
+         * UCID#: 31555276
+         * DATE: 4/4/23
+         * COMMENT: Logic for calculating winners (TIED GAME)
+         */
                 if (choiceA.equals(choiceB)) {
                     sendMessage(null, String.format("%s has tied with %s.  %s chose %s and %s chose %s.",
                             playerA.getClient().getClientName(), playerB.getClient().getClientName(),
                             playerA.getClient().getClientName(), playerA.getChoice(),
                             playerB.getClient().getClientName(), playerB.getChoice()));
-
-                    // GOAL: Make B lose
-                    System.out.println("TESTING 2b");
+        /*
+         * UCID#: 31555276
+         * DATE: 4/4/23
+         * COMMENT: Logic for calculating winners (PLAYER A & PLAYER B)
+         */
                 } else if ((choiceA.equalsIgnoreCase("R")) && choiceB.equalsIgnoreCase("S") ||
                         (choiceA.equalsIgnoreCase("P")) && choiceB.equalsIgnoreCase("R") ||
                         (choiceA.equalsIgnoreCase("S")) && choiceB.equalsIgnoreCase("P")) {
@@ -223,7 +218,6 @@ public class GameRoom extends Room {
                 } else if (((choiceA.equalsIgnoreCase("S")) && choiceB.equalsIgnoreCase("R") ||
                         (choiceA.equalsIgnoreCase("R")) && choiceB.equalsIgnoreCase("P") ||
                         (choiceA.equalsIgnoreCase("P")) && choiceB.equalsIgnoreCase("S"))) {
-                    System.out.println("TESTING 2c");
                     playerB.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("%s has lost to  %s. " +
                             "%s chose %s and %s chose %s.",
                             playerA.getClient().getClientName(), playerB.getClient().getClientName(),
@@ -233,24 +227,32 @@ public class GameRoom extends Room {
                     playerA.setIsOut(true);
                 }
             }
-            System.out.println("TESTING 3");
+        /*
+         * UCID#: 31555276
+         * DATE: 4/4/23
+         * COMMENT: Logic for Syncing points win/lose/tied report
+         */
             for (ServerPlayer players : players.values()) {
                 syncPoints(players.getClient().getClientId(), players.getPoints());
                 syncOut(players.getClient().getClientId());
             }
+        /*
+         * UCID#: 31555276
+         * DATE: 4/4/23
+         * COMMENT: Logic for  only 1 player pick.The rest skips.
+         */
         } else if (numReadyCount == 1) {
-            players.values().stream().filter(players -> players.getChoice() == null && players.isOut() == true)
+            players.values().stream().filter(players -> players.getChoice() != null && !players.isOut() == true)
                     .forEach(p -> {
                         p.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("%s has won the game",
                                 p.getClient().getClientName()));
-                                resetSession();
+                        resetSession();
                     });
-        }else{
+        } else {
             resetSession();
         }
-        updatePhase(Phase.PICKING);
     }
-    
+
     private void syncPoints(long clientId, int points) {
         Iterator<ServerPlayer> iter = players.values().stream().iterator();
         while (iter.hasNext()) {
@@ -267,7 +269,6 @@ public class GameRoom extends Room {
         Iterator<ServerPlayer> iter = players.values().stream().iterator();
         while (iter.hasNext()) {
             ServerPlayer client = iter.next();
-            // client = iter.next();
             boolean success = client.getClient().sendOut(clientId);
             if (!success) {
                 handleDisconnect(client);
@@ -295,7 +296,7 @@ public class GameRoom extends Room {
         updatePhase(Phase.READY);
         sendMessage(null, "Session ended, please intiate ready check to begin a new one");
         players.values().stream().forEach(p -> {
-            p.setPoints(0); 
+            p.setPoints(0);
         });
     }
 

@@ -319,8 +319,16 @@ public enum Client {
      * 
      * @param p
      */
+
+     /*
+      * UCID#: 31555276
+      * DATE: 4/4/23
+      */
     private void processPayload(Payload p) {
         switch (p.getPayloadType()) {
+            /*
+             * Payload for clients to connect to localhost
+             */
             case CONNECT:
                 if (!userList.containsKey(p.getClientId())) {
                     userList.put(p.getClientId(), p.getClientName());
@@ -329,6 +337,10 @@ public enum Client {
                         p.getClientName(),
                         p.getMessage()));
                 break;
+
+            /*
+             * Payload for disonnecting from the game/server
+             */
             case DISCONNECT:
                 if (userList.containsKey(p.getClientId())) {
                     userList.remove(p.getClientId());
@@ -340,16 +352,32 @@ public enum Client {
                         p.getClientName(),
                         p.getMessage()));
                 break;
+            /*
+             * UCID#: 31555276
+             * DATE: 4/4/23
+             */
+
+            /*
+             * Paylaod for geeting all the clioents in a room
+            */
             case SYNC_CLIENT:
                 if (!userList.containsKey(p.getClientId())) {
                     userList.put(p.getClientId(), p.getClientName());
                 }
-                break;//EDITED 3/29
+                break;
+
+            /* 
+             * Payload for sending message, ex chat 
+             */
             case MESSAGE:
                 System.out.println(Constants.ANSI_CYAN +String.format("%s: %s",
                         getClientNameById(p.getClientId()),
                         p.getMessage())+ Constants.ANSI_RESET);
                 break;
+
+            /*
+             * Payload for geting clientID
+             */
             case CLIENT_ID:
                 if (myClientId == Constants.DEFAULT_CLIENT_ID) {
                     myClientId = p.getClientId();
@@ -357,6 +385,14 @@ public enum Client {
                     logger.warning("Receiving client id despite already being set");
                 }
                 break;
+            /*
+             * UCID#: 31555276
+             * DATE: 4/4/23
+             */
+
+            /* 
+             * Payload for getting the creted rooms
+             */
             case GET_ROOMS:
                 RoomResultPayload rp = (RoomResultPayload) p;
                 System.out.println("Received Room List:");
@@ -368,29 +404,59 @@ public enum Client {
                     }
                 }
                 break;
+            
+            /*
+             * Payload for getting the list of rooms created
+             */
             case RESET_USER_LIST:
                 userList.clear();
                 break;
+
+            /*
+            * Payload to set the players satus to start the game
+            */
             case READY:
             System.out.println(String.format("Player %s is ready", getClientNameById(p.getClientId()))
-                        + Constants.ANSI_RESET); //EDITED 3/29
+                        + Constants.ANSI_RESET); 
                 break;
+            /*
+             * UCID#: 31555276
+             * DATE: 4/4/23
+             */
+
+            /*
+             * Payload for the different phase of the game.
+             */
             case PHASE:
-                System.out.println(Constants.ANSI_YELLOW + String.format("The current phase is %s", p.getMessage())+ Constants.ANSI_RESET);// EDITED 3/29
-            case CHOICE: //EDITED 3/27
-            try {// EDITED 3/30
+                System.out.println(Constants.ANSI_YELLOW + String.format("The current phase is %s", p.getMessage())+ Constants.ANSI_RESET);
+                break;
+
+            /*
+             * Payload for getting the players picked choice
+             */
+            case CHOICE:
+            try {
                 System.out.println(String.format(Constants.ANSI_GREEN + "Player %s chosen %s",p.getClientId(),p.getChoice()) 
-                + Constants.ANSI_RESET); // EDITED 3/29
+                + Constants.ANSI_RESET);
             } catch (Exception e) {
-                // TODO: handle exception
                 logger.severe(Constants.ANSI_RED + String.format("Error handling position payload: %s", e)
                             + Constants.ANSI_RESET);
             }
-            case POINTS: //EDITED 3/31
-            //PointsPayload pt = (PointsPayload) p;
+            break;
 
-
+            /*
+             * UCID#: 31555276
+             * DATE: 4/4/23
+             */
+                        
+            /*
+             * Payload for points that the player earn.
+             */
+            case POINTS: 
                 break;
+            /*
+             * Paylod for syncing if a player is out.
+             */
             case OUT:
                 
                 break;   

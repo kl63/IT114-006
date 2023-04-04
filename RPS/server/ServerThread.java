@@ -48,14 +48,6 @@ public class ServerThread extends Thread {
 
     }
 
-    /*
-     * protected void setChoice(String pick){ //EDITED 3/27
-     * choice = pick;
-     * }
-     * public String getChoice(){ //EDITED 3/27
-     * return choice;
-     * }
-     */
     protected void setClientName(String name) {
         if (name == null || name.isBlank()) {
             logger.warning("Invalid name being set");
@@ -94,7 +86,7 @@ public class ServerThread extends Thread {
         p.setClientId(clientId);
         return send(p);
     }
-    
+
     public boolean sendPoints(int points, long clientId) { // EDITED 3/31
         PointsPayload p = new PointsPayload();
         p.setPayloadType(PayloadType.POINTS);
@@ -227,15 +219,29 @@ public class ServerThread extends Thread {
             cleanup();
         }
     }
-
+    /*
+     * UCID#: 31555276
+     * DATE: 4/4/23
+     */
     void processPayload(Payload p) {
         switch (p.getPayloadType()) {
+            /*
+             * Payload from client if conneted to localhost
+             */
             case CONNECT:
                 setClientName(p.getClientName());
                 break;
+
+            /*
+             * Payload from client if disconnected
+             */
             case DISCONNECT:
                 Room.disconnectClient(this, getCurrentRoom());
                 break;
+
+            /*
+             * Payload for sending messages.
+             */
             case MESSAGE:
                 if (currentRoom != null) {
                     currentRoom.sendMessage(this, p.getMessage());
@@ -245,15 +251,39 @@ public class ServerThread extends Thread {
                     Room.joinRoom(Constants.LOBBY, this);
                 }
                 break;
+            /*
+             * UCID#: 31555276
+             * DATE: 4/4/23
+            */
+
+            /*
+             * Payload for available rooms to join.
+             */
             case GET_ROOMS:
                 Room.getRooms(p.getMessage().trim(), this);
                 break;
+
+            /*
+             * Payload for making a room.
+             */
             case CREATE_ROOM:
                 Room.createRoom(p.getMessage().trim(), this);
                 break;
+
+            /*
+             * Payload for joining a creted room.
+             */
             case JOIN_ROOM:
                 Room.joinRoom(p.getMessage().trim(), this);
                 break;
+
+            /*
+             * UCID#: 31555276
+             * DATE: 4/4/23
+             */
+            /*
+             * Payload from client regarding their ready status
+             */
             case READY:
                 try {
                     ((GameRoom) currentRoom).setReady(this);
@@ -262,16 +292,26 @@ public class ServerThread extends Thread {
                     e.printStackTrace();
                 }
                 break;
-            case CHOICE: // EDITED 3/27
+
+            /*
+             * Payload from client on their pick
+             */
+            case CHOICE:
                 try {
-                    ((GameRoom) currentRoom).setChoice(p.getChoice(), myClientId); // EDITED 3/29
+                    ((GameRoom) currentRoom).setChoice(p.getChoice(), myClientId);
                 } catch (Exception e) {
                     logger.severe(String.format("There was a problem during setChoice %s", e.getMessage()));
                     e.printStackTrace();
                 }
-
                 break;
-            case SKIP: // EDITED 3/27
+            /*
+             * UCID#: 31555276
+             * DATE: 4/4/23
+            */
+            /*
+             * Payload for skipping a turn
+             */
+            case SKIP:
                 try {
                     ((GameRoom) currentRoom).setSkip(this);
                     ;
