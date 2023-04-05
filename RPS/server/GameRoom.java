@@ -235,6 +235,7 @@ public class GameRoom extends Room {
             for (ServerPlayer players : players.values()) {
                 syncPoints(players.getClient().getClientId(), players.getPoints());
                 syncOut(players.getClient().getClientId());
+                
             }
         /*
          * UCID#: 31555276
