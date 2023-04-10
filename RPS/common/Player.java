@@ -37,7 +37,7 @@ public class Player {
     private int points = 0; //EDITED 3/31
 
     public void setPoints(int points) {
-        this.points = points;
+        this.points += points;
     }
 
     public void changePoints(int points) {
