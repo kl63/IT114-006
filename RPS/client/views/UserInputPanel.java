@@ -15,11 +15,6 @@ import javax.swing.JTextField;
 import RPS.client.Card;
 import RPS.client.ICardControls;
 
-/*
- * UCID#: 31555276
- * DATE: 4/14/23
- * COMMENTS: Code for the UI Host, Port, and U
- */
 public class UserInputPanel extends JPanel {
     private static Logger logger = Logger.getLogger(UserInputPanel.class.getName());
     private String username;

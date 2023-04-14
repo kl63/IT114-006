@@ -130,6 +130,11 @@ public class GameRoom extends Room {
             }
         }
     }
+    /*
+     * UCID#: 31555276
+     * DATE: 4/14/23
+     * COMMENT: Round Start
+     */
 
     private void start() {
         players.values().stream().forEach(p -> {
@@ -139,6 +144,11 @@ public class GameRoom extends Room {
             p.setSkip(false);
         });
         updatePhase(Phase.PICKING);
+           /*
+     * UCID#: 31555276
+     * DATE: 4/14/23
+     * COMMENT: Players have X seconds to pick
+     */
         sendMessage(null, "Choosing started please type R, P, or S");
         new TimedEvent(19, () -> outcome())
                 .setTickCallback((time) -> { // TO FIX MILESTONE 3
@@ -150,7 +160,7 @@ public class GameRoom extends Room {
 
     /*
      * UCID#: 31555276
-     * DATE: 4/4/23
+     * DATE: 4/14/23
      * COMMENT: Logic for not picking on time and skipping
      */
     private void outcome() {
@@ -195,7 +205,7 @@ public class GameRoom extends Room {
                 String choiceB = playerB.getChoice();
                 /*
                  * UCID#: 31555276
-                 * DATE: 4/4/23
+                 * DATE: 4/14/23
                  * COMMENT: Logic for calculating winners (TIED GAME)
                  */
                 if (choiceA.equals(choiceB)) {
@@ -208,7 +218,7 @@ public class GameRoom extends Room {
                 
                     /*
                      * UCID#: 31555276
-                     * DATE: 4/4/23
+                     * DATE: 4/14/23
                      * COMMENT: Logic for calculating winners (PLAYER A & PLAYER B)
                      */
                 } else if ((choiceA.equalsIgnoreCase("R")) && choiceB.equalsIgnoreCase("S") ||
