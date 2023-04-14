@@ -15,7 +15,7 @@ import RPS.common.PointsPayload; //EDITED 3/31
 public enum Server {
     INSTANCE;
 
-    int port = 3001;
+    int port = 3003;
     private static Logger logger = Logger.getLogger(Server.class.getName());
     private List<Room> rooms = new ArrayList<Room>();
     private Room lobby = null;// default room

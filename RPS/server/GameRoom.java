@@ -11,7 +11,7 @@ import RPS.common.Constants;
 import RPS.common.Phase;
 import RPS.common.Player;
 import RPS.common.TimedEvent;
-import RPS.common.PointsPayload; //EDITED 3/31
+import RPS.common.PointsPayload;
 
 public class GameRoom extends Room {
     Phase currentPhase = Phase.READY;
@@ -59,6 +59,7 @@ public class GameRoom extends Room {
             ServerPlayer player = new ServerPlayer(client);
             super.addClient(client);
             logger.info(String.format("Total clients %s", clients.size()));
+            client.sendPhaseSync(currentPhase);
             return player;
         });
     }
@@ -129,6 +130,11 @@ public class GameRoom extends Room {
             }
         }
     }
+    /*
+     * UCID#: 31555276
+     * DATE: 4/14/23
+     * COMMENT: Round Start
+     */
 
     private void start() {
         players.values().stream().forEach(p -> {
@@ -138,17 +144,23 @@ public class GameRoom extends Room {
             p.setSkip(false);
         });
         updatePhase(Phase.PICKING);
+           /*
+     * UCID#: 31555276
+     * DATE: 4/14/23
+     * COMMENT: Players have X seconds to pick
+     */
         sendMessage(null, "Choosing started please type R, P, or S");
-        new TimedEvent(19, () -> outcome());
-        // .setTickCallback((time) -> { //TO FIX MILESTONE 3
-        // sendMessage(null, String.format("Picking session, time remaining: %s",
-        // time));
-        // });
-
+        new TimedEvent(19, () -> outcome())
+                .setTickCallback((time) -> { // TO FIX MILESTONE 3
+                    sendMessage(null, String.format("Picking session, time remaining: %s",
+                            time));
+                });
     }
+
+
     /*
      * UCID#: 31555276
-     * DATE: 4/4/23
+     * DATE: 4/14/23
      * COMMENT: Logic for not picking on time and skipping
      */
     private void outcome() {
@@ -171,8 +183,10 @@ public class GameRoom extends Room {
         /*
          * UCID#: 31555276
          * DATE: 4/4/23
-         * COMMENT: Logic for calculating winners (i.e., Player 1 vs Player 2 vs Player 3 vs Player 
-         * 1) Each player is compared against the following player; the last player is compared against 
+         * COMMENT: Logic for calculating winners (i.e., Player 1 vs Player 2 vs Player
+         * 3 vs Player
+         * 1) Each player is compared against the following player; the last player is
+         * compared against
          * the first to complete the cycle.
          */
         List<ServerPlayer> numReady = (List<ServerPlayer>) players.values().stream().filter(p -> p.isReady()
@@ -189,21 +203,24 @@ public class GameRoom extends Room {
 
                 String choiceA = playerA.getChoice();
                 String choiceB = playerB.getChoice();
-        /*
-         * UCID#: 31555276
-         * DATE: 4/4/23
-         * COMMENT: Logic for calculating winners (TIED GAME)
-         */
+                /*
+                 * UCID#: 31555276
+                 * DATE: 4/14/23
+                 * COMMENT: Logic for calculating winners (TIED GAME)
+                 */
                 if (choiceA.equals(choiceB)) {
                     sendMessage(null, String.format("%s has tied with %s.  %s chose %s and %s chose %s.",
                             playerA.getClient().getClientName(), playerB.getClient().getClientName(),
                             playerA.getClient().getClientName(), playerA.getChoice(),
                             playerB.getClient().getClientName(), playerB.getChoice()));
-        /*
-         * UCID#: 31555276
-         * DATE: 4/4/23
-         * COMMENT: Logic for calculating winners (PLAYER A & PLAYER B)
-         */
+                            resetSession();
+                            
+                
+                    /*
+                     * UCID#: 31555276
+                     * DATE: 4/14/23
+                     * COMMENT: Logic for calculating winners (PLAYER A & PLAYER B)
+                     */
                 } else if ((choiceA.equalsIgnoreCase("R")) && choiceB.equalsIgnoreCase("S") ||
                         (choiceA.equalsIgnoreCase("P")) && choiceB.equalsIgnoreCase("R") ||
                         (choiceA.equalsIgnoreCase("S")) && choiceB.equalsIgnoreCase("P")) {
@@ -214,6 +231,9 @@ public class GameRoom extends Room {
                             playerB.getClient().getClientName(), playerB.getChoice()));
                     playerA.setPoints(5);
                     playerB.setIsOut(true);
+                    resetSession();
+                   
+                 
 
                 } else if (((choiceA.equalsIgnoreCase("S")) && choiceB.equalsIgnoreCase("R") ||
                         (choiceA.equalsIgnoreCase("R")) && choiceB.equalsIgnoreCase("P") ||
@@ -225,33 +245,55 @@ public class GameRoom extends Room {
                             playerA.getClient().getClientName(), playerA.getChoice()));
                     playerB.setPoints(5);
                     playerA.setIsOut(true);
+                    resetSession();
+                   
+                    
+                   
+
                 }
             }
-        /*
-         * UCID#: 31555276
-         * DATE: 4/4/23
-         * COMMENT: Logic for Syncing points win/lose/tied report
-         */
-            for (ServerPlayer players : players.values()) {
+            /*
+             * UCID#: 31555276
+             * DATE: 4/4/23
+             * COMMENT: Logic for Syncing points win/lose/tied report
+             */
+            /*for (ServerPlayer players : players.values()) {
                 syncPoints(players.getClient().getClientId(), players.getPoints());
                 syncOut(players.getClient().getClientId());
-                
-            }
-        /*
-         * UCID#: 31555276
-         * DATE: 4/4/23
-         * COMMENT: Logic for  only 1 player pick.The rest skips.
-         */
+                String message = players.getClient().getClientName() + ": " + players.getPoints();
+                sendMessage(null, message + " points");
+            }*/
+            
+            
+        
+            
+            /*
+             * UCID#: 31555276
+             * DATE: 4/4/23
+             * COMMENT: Logic for only 1 player pick.The rest skips.
+             */
         } else if (numReadyCount == 1) {
             players.values().stream().filter(players -> players.getChoice() != null && !players.isOut() == true)
                     .forEach(p -> {
                         p.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("%s has won the game",
-                                p.getClient().getClientName()));
+                                p.getClient().getClientName()));       
                         resetSession();
+                        
+                        
+                        
                     });
         } else {
             resetSession();
+            
         }
+        for (ServerPlayer players : players.values()) {
+            syncPoints(players.getClient().getClientId(), players.getPoints());
+            syncOut(players.getClient().getClientId());
+            String message = players.getClient().getClientName() + ": " + players.getPoints();
+            sendMessage(null, message + " points");
+        }
+
+            
     }
 
     private void syncPoints(long clientId, int points) {
@@ -264,8 +306,16 @@ public class GameRoom extends Room {
                 handleDisconnect(client);
             }
         }
-    }
+        
+            
+        }
+    
+    
+        
+    
 
+
+    
     private void syncOut(long clientId) {
         Iterator<ServerPlayer> iter = players.values().stream().iterator();
         while (iter.hasNext()) {
