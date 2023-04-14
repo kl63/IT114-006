@@ -247,12 +247,12 @@ public class GameRoom extends Room {
              * DATE: 4/4/23
              * COMMENT: Logic for Syncing points win/lose/tied report
              */
-            for (ServerPlayer players : players.values()) {
+            /*for (ServerPlayer players : players.values()) {
                 syncPoints(players.getClient().getClientId(), players.getPoints());
                 syncOut(players.getClient().getClientId());
                 String message = players.getClient().getClientName() + ": " + players.getPoints();
                 sendMessage(null, message + " points");
-            }
+            }*/
             
             
         
@@ -275,6 +275,12 @@ public class GameRoom extends Room {
         } else {
             resetSession();
             
+        }
+        for (ServerPlayer players : players.values()) {
+            syncPoints(players.getClient().getClientId(), players.getPoints());
+            syncOut(players.getClient().getClientId());
+            String message = players.getClient().getClientName() + ": " + players.getPoints();
+            sendMessage(null, message + " points");
         }
 
             

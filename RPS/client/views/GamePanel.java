@@ -4,12 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
@@ -63,6 +61,11 @@ public class GamePanel extends JPanel implements IClientEvents {
         }
     }
 
+    private void drawBoard() {
+        gridLayout.setVisible(true);
+        gridLayout.repaint();
+    }
+
     // Although we must implement all of these methods, not all of them may be
     // applicable to this panel
     @Override
@@ -103,6 +106,9 @@ public class GamePanel extends JPanel implements IClientEvents {
 
     @Override
     public void onRoomJoin(String roomName) {
+        logger.info(
+                Constants.ANSI_BRIGHT_BLUE + String.format("Received room name %s", roomName) + Constants.ANSI_RESET);
+
         if (roomName.equalsIgnoreCase("lobby")) {
             setVisible(false);
         } else {
@@ -135,67 +141,18 @@ public class GamePanel extends JPanel implements IClientEvents {
 
     @Override
     public void onReceivePhase(Phase phase) {
-        this.setVisible(true);
         logger.info(Constants.ANSI_BRIGHT_BLUE + String.format("Received phase %s", phase) + Constants.ANSI_RESET);
         if (phase == Phase.READY) {
             readyCheck.setVisible(true);
-        } else if (phase == Phase.PICKING) { // EDITED 4/10
+            gridLayout.setVisible(false);
+        } else if (phase == Phase.PICKING) {
             readyCheck.setVisible(false);
-            JPanel buttonsPanel = new JPanel(new FlowLayout());
-            
-            JButton rockButton = new JButton("ROCK (R)");
-            JButton paperButton = new JButton("PAPER (P)");
-            JButton scissorsButton = new JButton("SCISSORS (S)");
-            JButton skipButton = new JButton("SKIP");
-            buttonsPanel.add(rockButton);
-            buttonsPanel.add(paperButton);
-            buttonsPanel.add(scissorsButton);
-            buttonsPanel.add(skipButton);
-            rockButton.addActionListener((event) -> {
-                try {
-                    Client.INSTANCE.sendChoice("R");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            paperButton.addActionListener((event) -> {
-                try {
-                    Client.INSTANCE.sendChoice("P");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            scissorsButton.addActionListener((event) -> {
-                try {
-                    Client.INSTANCE.sendChoice("S");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            skipButton.addActionListener((event) -> {
-                try {
-                    Client.INSTANCE.sendSkip();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            //add buton panel to UI
-            buttonsPanel.setPreferredSize(new Dimension(200, 50));
-        this.add(buttonsPanel, BorderLayout.WEST);
-            
+            gridLayout.setVisible(true);
         }
-
         this.validate();
         this.repaint();
         logger.info(
                 Constants.ANSI_BRIGHT_MAGENTA + String.format("Dimension %s", this.getSize()) + Constants.ANSI_RESET);
-    }
-
-    @Override
-    public void onReceivePoints(long clientId, int points) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method
-        // 'onReceivePoints'");
     }
 
     @Override
@@ -205,12 +162,7 @@ public class GamePanel extends JPanel implements IClientEvents {
         // 'onReceiveSeeker'");
     }
 
-    @Override
-    public void onReceiveHide(int x, int y, long clientId) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method
-        // 'onReceiveHide'");
-    }
+   
 
     @Override
     public void onReceiveOut(long clientId) {
@@ -218,4 +170,20 @@ public class GamePanel extends JPanel implements IClientEvents {
         // throw new UnsupportedOperationException("Unimplemented method
         // 'onReceiveOut'");
     }
+
+   
+    
+
+    @Override
+    public void onReceivePoints(long clientId, int points) {
+        
+    }
+
+    @Override
+    public void onReceiveHide(int x, int y, long clientId) {
+        // TODO Auto-generated method stub
+        //throw new UnsupportedOperationException("Unimplemented method 'onReceiveHide'");
+    }
+
+
 }
