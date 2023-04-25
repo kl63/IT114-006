@@ -18,6 +18,7 @@ import RPS.client.ICardControls;
 public class UserInputPanel extends JPanel {
     private static Logger logger = Logger.getLogger(UserInputPanel.class.getName());
     private String username;
+   //JPanel userListArea;
 
     public UserInputPanel(ICardControls controls) {
         super(new BorderLayout(10, 10));
@@ -78,4 +79,7 @@ public class UserInputPanel extends JPanel {
     public String getUsername() {
         return username;
     }
-}
+    
+    }
+    
+    

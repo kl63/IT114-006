@@ -67,7 +67,7 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
             }
         });
 
-        setMinimumSize(new Dimension(800, 600));
+        setMinimumSize(new Dimension(800, 300));//EDITED 4/20
         // centers window
         setLocationRelativeTo(null);
         card = new CardLayout();
@@ -84,6 +84,8 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
         gamePanel.setPreferredSize(new Dimension((int) (this.getWidth() * .5), (int) this.getHeight()));
         gamePanel.setMinimumSize(gamePanel.getPreferredSize());
         chatPanel.add(gamePanel, BorderLayout.WEST);
+        gamePanel.setUserListPanel(chatPanel.getUserListPanel()); //EDITED 4/20
+        
 
         // https://stackoverflow.com/a/9093526
         // this tells the x button what to do (updated to be controlled via a prompt)
@@ -163,7 +165,10 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
     }
 
     private String mapClientId(long clientId) {
-        String clientName = userList.get(clientId);
+        String clientName = null;
+        if (userList.containsKey(clientId)) {
+            clientName = userList.get(clientId);
+        }
         if (clientName == null) {
             clientName = "Server";
         }
@@ -183,7 +188,7 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
             if (!userList.containsKey(clientId)) {
                 logger.log(Level.INFO, String.format("Adding %s[%s]", clientName, clientId));
                 userList.put(clientId, clientName);
-                chatPanel.addUserListItem(clientId, String.format("%s (%s)", clientName, clientId));
+                chatPanel.addUserListItem(clientId, clientName);
             }
         } else {
             if (userList.containsKey(clientId)) {
@@ -281,24 +286,11 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
     }
 
     @Override
-    public void onReceiveSeeker(long clientId) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method
-        // 'onReceiveSeeker'");
-    }
-
-    @Override
-    public void onReceiveHide(int x, int y, long clientId) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method
-        // 'onReceiveHide'");
-    }
-
-    @Override
     public void onReceiveOut(long clientId) {
-        // TODO Auto-generated method stub
-        // throw new UnsupportedOperationException("Unimplemented method
-        // 'onReceiveOut'");
+        if (clientId == Constants.DEFAULT_CLIENT_ID) {
+            return;// This is just the command to tell GamePanel to reset the out list
+        }
+        chatPanel.addText(String.format("%s is out :(", mapClientId(clientId)));
     }
 
 
@@ -315,5 +307,22 @@ public class ClientUI extends JFrame implements IClientEvents, ICardControls {
         // throw new UnsupportedOperationException("Unimplemented method
         // 'onReceiveReadyCount'");
     }
+
+    @Override
+    public void onReceiveAway(long clientId, boolean isAway) { //EDITED 4/24
+        // TODO Auto-generated method stub
+        //throw new UnsupportedOperationException("Unimplemented method 'onReceiveAway'");
+    }
+
+    @Override
+    public void onReceiveSpectator(long clientId, boolean isSpectator) { //EDITEd 4/24
+        // TODO Auto-generated method stub
+        //throw new UnsupportedOperationException("Unimplemented method 'onReceiveSpectator'");
+    }
+
+
+    
+
+
 
 }

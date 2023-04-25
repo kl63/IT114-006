@@ -117,6 +117,18 @@ public class ServerThread extends Thread {
         p.setClientId(clientId);
         return send(p);
     }
+    public boolean sendAwayStatus(long clientId) { //EDITED 4/21
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.AWAY);
+        p.setClientId(clientId);
+        return send(p);
+    }
+    public boolean sendSpectatorStatus(long clientId) { //EDITED 4/24
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.SPECTATOR);
+        p.setClientId(clientId);
+        return send(p);
+    }
 
     public boolean sendRoomName(String name) {
         Payload p = new Payload();
@@ -298,6 +310,8 @@ public class ServerThread extends Thread {
              */
             case CHOICE:
                 try {
+                    
+
                     ((GameRoom) currentRoom).setChoice(p.getChoice(), myClientId);
                 } catch (Exception e) {
                     logger.severe(String.format("There was a problem during setChoice %s", e.getMessage()));
@@ -317,6 +331,23 @@ public class ServerThread extends Thread {
                     ;
                 } catch (Exception e) {
                     logger.severe(String.format("There was a problem during setSkip %s", e.getMessage()));
+                    e.printStackTrace();
+                }
+                break;
+                case AWAY: //EDITED 4/21
+                try {
+                    ((GameRoom) currentRoom).setAway(this);
+                    ;
+                } catch (Exception e) {
+                    logger.severe(String.format("There was a problem during setAway %s", e.getMessage()));
+                    e.printStackTrace();
+                }
+                break; 
+                case SPECTATOR: //EDITED 4/24
+                try {
+                    ((GameRoom) currentRoom).setSpectator(this);
+                } catch (Exception e) {
+                    logger.severe(String.format("There was a problem during setSpectator %s", e.getMessage()));
                     e.printStackTrace();
                 }
                 break;

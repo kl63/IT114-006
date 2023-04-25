@@ -36,6 +36,7 @@ public enum Client {
     private String clientName = "";
     private long myClientId = Constants.DEFAULT_CLIENT_ID;
     private static Logger logger = Logger.getLogger(Client.class.getName());
+    private boolean isAway = false; // EDITED 4/19
 
     // private Hashtable<Long, String> userList = new Hashtable<Long, String>();
     // //EDITED 4/4
@@ -53,6 +54,14 @@ public enum Client {
         // if the server had a problem
         return server.isConnected() && !server.isClosed() && !server.isInputShutdown() && !server.isOutputShutdown();
 
+    }
+
+    public boolean isAway() { // EDITED 4/19
+        return isAway ;
+    }
+
+    public void setAway(boolean isAway) { // EDITED 4/19
+        this.isAway = isAway;
     }
 
     public boolean isCurrentPhase(Phase phase) { // EDITED 4/4
@@ -115,27 +124,27 @@ public enum Client {
         out.writeObject(p);
     }
 
-    public void sendReadyStatus() throws IOException { //EDITED 4/4
+    public void sendReadyStatus() throws IOException { // EDITED 4/4
         Payload p = new Payload();
         p.setPayloadType(PayloadType.READY);
         out.writeObject(p);
     }
 
-    public void sendListRooms(String query) throws IOException { //EDITED 4/4
+    public void sendListRooms(String query) throws IOException { // EDITED 4/4
         Payload p = new Payload();
         p.setPayloadType(PayloadType.GET_ROOMS);
         p.setMessage(query);
         out.writeObject(p);
     }
 
-    public void sendJoinRoom(String roomName) throws IOException { //EDITED 4/4
+    public void sendJoinRoom(String roomName) throws IOException { // EDITED 4/4
         Payload p = new Payload();
         p.setPayloadType(PayloadType.JOIN_ROOM);
         p.setMessage(roomName);
         out.writeObject(p);
     }
 
-    public void sendCreateRoom(String roomName) throws IOException {  //EDITED 4/4
+    public void sendCreateRoom(String roomName) throws IOException { // EDITED 4/4
         Payload p = new Payload();
         p.setPayloadType(PayloadType.CREATE_ROOM);
         p.setMessage(roomName);
@@ -155,11 +164,23 @@ public enum Client {
         out.writeObject(p);
     }
 
-    public void sendMessage(String message) throws IOException { //EDITED 4/4
+    public void sendMessage(String message) throws IOException { // EDITED 4/4
         Payload p = new Payload();
         p.setPayloadType(PayloadType.MESSAGE);
         p.setMessage(message);
         p.setClientName(clientName);
+        out.writeObject(p);
+    }
+
+    public void sendAwayStatus() throws IOException { // EDITED 4/21
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.AWAY);
+        out.writeObject(p);
+
+    }
+    public void sendSpectatorStatus() throws IOException { // EDITED 4/24
+        Payload p = new Payload();
+        p.setPayloadType(PayloadType.SPECTATOR);
         out.writeObject(p);
     }
 
@@ -169,7 +190,7 @@ public enum Client {
             public void run() {
                 try {
                     Payload fromServer;
-                    isRunning = true; //EDITED 4/10
+                    isRunning = true; // EDITED 4/10
 
                     // while we're connected, listen for objects from server
                     while (isRunning && !server.isClosed() && !server.isInputShutdown()
@@ -372,7 +393,7 @@ public enum Client {
             /*
              * Payload for points that the player earn.
              */
-            case POINTS: //EDITED 4/4
+            case POINTS: // EDITED 4/4
                 try {
                     PointsPayload pp = (PointsPayload) p;
                     if (players.containsKey(p.getClientId())) {
@@ -386,7 +407,7 @@ public enum Client {
             /*
              * Paylod for syncing if a player is out.
              */
-            case OUT: //EDITED 4/4
+            case OUT: // EDITED 4/4
                 if (p.getClientId() == Constants.DEFAULT_CLIENT_ID) {
                     players.values().stream().forEach(player -> player.setIsOut(false));
                     logger.info("Resetting out players");
@@ -401,6 +422,17 @@ public enum Client {
                 listeners.forEach(l -> l.onReceiveOut(p.getClientId()));
                 break;
 
+                case AWAY: // EDITED 4/24
+                if (players.containsKey(p.getClientId())) {
+                    players.get(p.getClientId()).setAway(isAway);
+                    if (isAway) {
+                        logger.info(String.format("Player %s is away", getClientNameById(p.getClientId()))
+                                + Constants.ANSI_RESET);
+                    }
+                }
+                listeners.forEach(l -> l.onReceiveAway(p.getClientId(), isAway));
+                break;
+
             default:
                 logger.warning(Constants.ANSI_RED + String.format("Unhandled Payload type: %s", p.getPayloadType())
                         + Constants.ANSI_RESET); // EDITEd 3/29
@@ -409,8 +441,7 @@ public enum Client {
         }
     }
 
-
-    private void close() { //EDITED 4/4
+    private void close() { // EDITED 4/4
         myClientId = Constants.DEFAULT_CLIENT_ID;
         players.clear();
         try {

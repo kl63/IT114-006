@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
+
 import RPS.common.Constants;
 import RPS.common.Phase;
 import RPS.common.Player;
@@ -78,6 +79,39 @@ public class GameRoom extends Room {
         }
 
     }
+    public void setAway(ServerThread client){ //EDITED 4/21
+        logger.info("Away check triggered");
+        if(currentPhase != Phase.PICKING){
+            logger.warning(String.format("setAway() incorrect phase: %s", Phase.PICKING.name()));
+            return;
+        }
+    
+        ServerPlayer player = players.get(client.getClientId());
+        if(player != null){
+            player.setAway(true);
+            logger.info(String.format("Marked player [%s] as ready", player.getClient().getClientName(), player
+                            .getClient().getClientId()));
+                    syncAwayStatus(player.getClient().getClientId());
+        }
+    }
+    public void setSpectator(ServerThread client) { //EDITED 4/24
+        logger.info("Spectator check triggered");
+        if (currentPhase != Phase.PICKING) {
+            logger.warning(String.format("setSpectator() incorrect phase: %s", Phase.PICKING.name()));
+            return;
+        }
+
+        ServerPlayer player = players.get(client.getClientId());
+        if (player != null) {
+            player.setSpectator(true);
+            logger.info(String.format("Marked player [%s] as spectator", player.getClient().getClientName(), player
+                            .getClient().getClientId()));
+            syncSpectatorStatus(player.getClient().getClientId());
+        }
+    }
+   
+
+
 
     protected void setReady(ServerThread client) {
         logger.info("Ready check triggered");
@@ -150,11 +184,11 @@ public class GameRoom extends Room {
      * COMMENT: Players have X seconds to pick
      */
         sendMessage(null, "Choosing started please type R, P, or S");
-        new TimedEvent(19, () -> outcome())
-                .setTickCallback((time) -> { // TO FIX MILESTONE 3
-                    sendMessage(null, String.format("Picking session, time remaining: %s",
-                            time));
-                });
+        new TimedEvent(30, () -> outcome()){
+                //.setTickCallback((time) -> { // TO FIX MILESTONE 3
+                    //sendMessage(null, String.format("Picking session, time remaining: %s",
+                            //time));
+                };
     }
 
 
@@ -390,5 +424,27 @@ public class GameRoom extends Room {
             }
         }
     }
+
+    public void syncAwayStatus(long clientId){ //EDITED 4/21
+        Iterator<ServerPlayer> iter = players.values().stream().iterator();
+        while (iter.hasNext()) {
+            ServerPlayer client = iter.next();
+            boolean success = client.getClient().sendAwayStatus(clientId);
+            if (!success) {
+                handleDisconnect(client);
+            }
+        }
+    }
+    public void syncSpectatorStatus(long clientId) { //EDITED 4/24
+        Iterator<ServerPlayer> iter = players.values().stream().iterator();
+        while (iter.hasNext()) {
+            ServerPlayer client = iter.next();
+            boolean success = client.getClient().sendSpectatorStatus(clientId);
+            if (!success) {
+                handleDisconnect(client);
+            }
+        }
+    }
+    
 
 }

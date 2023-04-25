@@ -5,6 +5,22 @@ public class Player {
     private boolean isReady = false;
     private String choice; //EDITED 3/28
     private boolean isSkip = false; //EDITED 3/31
+    private boolean isAway = false; //EDITED 4/21
+    private boolean isSpectator; //EDITED 4/24
+
+    public void setAway(boolean isAway){ //EDITED 4/21
+         this.isAway = isAway;
+    }
+    public boolean isAway() { //EDITED 4/24
+        return isAway;
+    }
+    public void setSpectator(boolean isSpectator) { //EDITED 4/24
+        this.isSpectator = isSpectator;
+    }
+
+    public boolean isSpectator() { //EDITED 4/24
+        return isSpectator;
+    }
 
     public void setReady(boolean isReady) {
         this.isReady = isReady;
@@ -27,8 +43,10 @@ public class Player {
     }
     private boolean isOut = false; //EDITED 3/30
 
+    
+
     public void setIsOut(boolean isOut) {
-        this.isOut = isOut; //EDITEd 4/3
+        this.isOut = isOut; //EDITED 4/3
     }
 
     public boolean isOut() {
@@ -50,6 +68,7 @@ public class Player {
     public int getPoints() {
         return points;
     }
+    
 
 
 
