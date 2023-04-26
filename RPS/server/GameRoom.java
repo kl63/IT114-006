@@ -1,12 +1,12 @@
 package RPS.server;
 
+import java.lang.System.Logger.Level;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
-
 
 import RPS.common.Constants;
 import RPS.common.Phase;
@@ -21,6 +21,7 @@ public class GameRoom extends Room {
     private String choice;
     private int rounds = 0;
     private ConcurrentHashMap<Long, ServerPlayer> players = new ConcurrentHashMap<Long, ServerPlayer>();
+   
 
     public GameRoom(String name) {
         super(name);
@@ -79,22 +80,24 @@ public class GameRoom extends Room {
         }
 
     }
-    public void setAway(ServerThread client){ //EDITED 4/21
+
+    public void setAway(ServerThread client) { // EDITED 4/21
         logger.info("Away check triggered");
-        if(currentPhase != Phase.PICKING){
+        if (currentPhase != Phase.PICKING) {
             logger.warning(String.format("setAway() incorrect phase: %s", Phase.PICKING.name()));
             return;
         }
-    
+
         ServerPlayer player = players.get(client.getClientId());
-        if(player != null){
+        if (player != null) {
             player.setAway(true);
             logger.info(String.format("Marked player [%s] as ready", player.getClient().getClientName(), player
-                            .getClient().getClientId()));
-                    syncAwayStatus(player.getClient().getClientId());
+                    .getClient().getClientId()));
+            syncAwayStatus(player.getClient().getClientId());
         }
     }
-    public void setSpectator(ServerThread client) { //EDITED 4/24
+
+    public void setSpectator(ServerThread client) { // EDITED 4/24
         logger.info("Spectator check triggered");
         if (currentPhase != Phase.PICKING) {
             logger.warning(String.format("setSpectator() incorrect phase: %s", Phase.PICKING.name()));
@@ -105,13 +108,10 @@ public class GameRoom extends Room {
         if (player != null) {
             player.setSpectator(true);
             logger.info(String.format("Marked player [%s] as spectator", player.getClient().getClientName(), player
-                            .getClient().getClientId()));
+                    .getClient().getClientId()));
             syncSpectatorStatus(player.getClient().getClientId());
         }
     }
-   
-
-
 
     protected void setReady(ServerThread client) {
         logger.info("Ready check triggered");
@@ -178,19 +178,18 @@ public class GameRoom extends Room {
             p.setSkip(false);
         });
         updatePhase(Phase.PICKING);
-           /*
-     * UCID#: 31555276
-     * DATE: 4/14/23
-     * COMMENT: Players have X seconds to pick
-     */
+        /*
+         * UCID#: 31555276
+         * DATE: 4/14/23
+         * COMMENT: Players have X seconds to pick
+         */
         sendMessage(null, "Choosing started please type R, P, or S");
-        new TimedEvent(30, () -> outcome()){
-                //.setTickCallback((time) -> { // TO FIX MILESTONE 3
-                    //sendMessage(null, String.format("Picking session, time remaining: %s",
-                            //time));
-                };
+        new TimedEvent(30, () -> outcome()) {
+            // .setTickCallback((time) -> { // TO FIX MILESTONE 3
+            // sendMessage(null, String.format("Picking session, time remaining: %s",
+            // time));
+        };
     }
-
 
     /*
      * UCID#: 31555276
@@ -200,20 +199,20 @@ public class GameRoom extends Room {
     private void outcome() {
         updatePhase(Phase.OUTCOME);
         players.values().stream()
-                .filter(players -> players.getChoice() == null && players.isOut() || players.isSkip() == true)
-                .forEach(p -> {
-                    p.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID,
-                            "You did not make a choice or skipped. You lose.");
+                .filter(players -> !players.isOut() && (players.getChoice() == null || players.isSkip() == true)).forEach(p -> {
+                    p.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID,"You did not make a choice or skipped. You lose.");
                     p.setIsOut(true);
                     syncOut(p.getClient().getClientId());
+                    
                 });
+                
 
-        long numReadyCount = players.values().stream().filter(p -> p.isReady() && p.getChoice() != null) // EDITED 4/2
-                .count();
+        players.values().stream().filter(p -> p.isAway() == true).forEach(p -> { // EDITED 4/25 AWAY PLAYER
+            p.setSkip(true);
+        });
 
-        for (ServerPlayer player : players.values()) {
-
-        }
+        long numReadyCount = players.values().stream().filter(p -> p.isReady() && p.getChoice() != null && !p.isAway() 
+        && !p.isOut() && !p.isSkip()).count(); 
         /*
          * UCID#: 31555276
          * DATE: 4/4/23
@@ -223,8 +222,9 @@ public class GameRoom extends Room {
          * compared against
          * the first to complete the cycle.
          */
-        List<ServerPlayer> numReady = (List<ServerPlayer>) players.values().stream().filter(p -> p.isReady()
-                && p.getChoice() != null).toList();
+        List<ServerPlayer> numReady = (List<ServerPlayer>) players.values().stream().filter(p -> p.isReady() 
+        && p.getChoice() != null && !p.isAway() && !p.isOut() && !p.isSkip()).toList();
+        logger.info(String.format("TESTING COUNT:  %s", numReady.size()));
         if (numReadyCount > 1) {
             for (int i = 0; i < numReadyCount; i++) {
                 ServerPlayer playerA = (ServerPlayer) numReady.get(i);
@@ -247,9 +247,8 @@ public class GameRoom extends Room {
                             playerA.getClient().getClientName(), playerB.getClient().getClientName(),
                             playerA.getClient().getClientName(), playerA.getChoice(),
                             playerB.getClient().getClientName(), playerB.getChoice()));
-                            resetSession();
-                            
-                
+                            //esetSession();
+
                     /*
                      * UCID#: 31555276
                      * DATE: 4/14/23
@@ -264,10 +263,8 @@ public class GameRoom extends Room {
                             playerA.getClient().getClientName(), playerA.getChoice(),
                             playerB.getClient().getClientName(), playerB.getChoice()));
                     playerA.setPoints(5);
-                    playerB.setIsOut(true);
-                    resetSession();
-                   
-                 
+                    //playerB.setIsOut(true);
+                    //resetSession();
 
                 } else if (((choiceA.equalsIgnoreCase("S")) && choiceB.equalsIgnoreCase("R") ||
                         (choiceA.equalsIgnoreCase("R")) && choiceB.equalsIgnoreCase("P") ||
@@ -279,28 +276,23 @@ public class GameRoom extends Room {
                             playerA.getClient().getClientName(), playerA.getChoice()));
                     playerB.setPoints(5);
                     playerA.setIsOut(true);
-                    resetSession();
-                   
-                    
-                   
+                    //resetSession();
 
                 }
             }
-            /*
-             * UCID#: 31555276
-             * DATE: 4/4/23
-             * COMMENT: Logic for Syncing points win/lose/tied report
-             */
-            /*for (ServerPlayer players : players.values()) {
-                syncPoints(players.getClient().getClientId(), players.getPoints());
-                syncOut(players.getClient().getClientId());
-                String message = players.getClient().getClientName() + ": " + players.getPoints();
-                sendMessage(null, message + " points");
-            }*/
-            
-            
         
-            
+        List<ServerPlayer> numReadyS = (List<ServerPlayer>) players.values().stream().filter(p -> p.isReady() 
+        && p.getChoice() != null && !p.isAway() && !p.isOut() && !p.isSkip()).toList();
+        logger.info(String.format("TESTING COUNT AFTER:  %s", numReadyS.size()));
+            //resetSession();
+            if(numReadyS.size() <= 1){
+                resetSession();
+
+            }else if(numReadyS.size() >1){
+                updatePhase(Phase.PICKING);
+                new TimedEvent(30, () -> outcome());
+
+            }
             /*
              * UCID#: 31555276
              * DATE: 4/4/23
@@ -310,26 +302,47 @@ public class GameRoom extends Room {
             players.values().stream().filter(players -> players.getChoice() != null && !players.isOut() == true)
                     .forEach(p -> {
                         p.getClient().sendMessage(Constants.DEFAULT_CLIENT_ID, String.format("%s has won the game",
-                                p.getClient().getClientName()));       
+                                p.getClient().getClientName()));
                         resetSession();
-                        
-                        
-                        
                     });
+
+        } else if (numReadyCount == 0) {
+                        sendMessage(null, String.format("Tied Game!"));
+                        resetSession();
+
         } else {
             resetSession();
-            
-        }
+    }
+
+    boolean gameOver = false;
+    if(numReadyCount == 0||numReadyCount == 1){
+        gameOver = true;
+        // Show Score
         for (ServerPlayer players : players.values()) {
             syncPoints(players.getClient().getClientId(), players.getPoints());
             syncOut(players.getClient().getClientId());
             String message = players.getClient().getClientName() + ": " + players.getPoints();
             sendMessage(null, message + " points");
         }
-
-            
+        resetSession();
+    }else{
+        players.values().stream().forEach(p -> {
+            p.setChoice(null);
+            p.setSkip(false);
+        });
+        updatePhase(Phase.PICKING);
+        new TimedEvent(30, () -> outcome());
     }
+}
 
+    /*
+     * for (ServerPlayer players : players.values()) {
+     * syncPoints(players.getClient().getClientId(), players.getPoints());
+     * syncOut(players.getClient().getClientId());
+     * String message = players.getClient().getClientName() + ": " +
+     * players.getPoints();
+     * sendMessage(null, message + " points");*/
+    
     private void syncPoints(long clientId, int points) {
         Iterator<ServerPlayer> iter = players.values().stream().iterator();
         while (iter.hasNext()) {
@@ -340,16 +353,10 @@ public class GameRoom extends Room {
                 handleDisconnect(client);
             }
         }
-        
-            
-        }
-    
-    
-        
-    
+
+    }
 
 
-    
     private void syncOut(long clientId) {
         Iterator<ServerPlayer> iter = players.values().stream().iterator();
         while (iter.hasNext()) {
@@ -367,7 +374,6 @@ public class GameRoom extends Room {
      * @param clientId
      */
     private void syncIsOut(long client) {
-
         Iterator<ServerPlayer> iter = players.values().stream().iterator();
         while (iter.hasNext()) {
             ServerPlayer sp = iter.next();
@@ -425,7 +431,7 @@ public class GameRoom extends Room {
         }
     }
 
-    public void syncAwayStatus(long clientId){ //EDITED 4/21
+    public void syncAwayStatus(long clientId) { // EDITED 4/21
         Iterator<ServerPlayer> iter = players.values().stream().iterator();
         while (iter.hasNext()) {
             ServerPlayer client = iter.next();
@@ -435,7 +441,8 @@ public class GameRoom extends Room {
             }
         }
     }
-    public void syncSpectatorStatus(long clientId) { //EDITED 4/24
+
+    public void syncSpectatorStatus(long clientId) { // EDITED 4/24
         Iterator<ServerPlayer> iter = players.values().stream().iterator();
         while (iter.hasNext()) {
             ServerPlayer client = iter.next();
@@ -445,6 +452,5 @@ public class GameRoom extends Room {
             }
         }
     }
-    
 
 }
