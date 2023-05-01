@@ -19,6 +19,7 @@
 ./client/ICardControls.java
 ./client/ClientUI.java
 ./client/views/UserInputPanel.java
+./client/views/UserListItem.java
 ./client/views/Menu.java
 ./client/views/ChatPanel.java
 ./client/views/RoomsPanel.java

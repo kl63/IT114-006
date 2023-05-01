@@ -1,4 +1,4 @@
-if [ "$2" = "server" ];  
+if [ "$2" = "server" ];
 then
 	java $1.server.Server
 elif [ "$2" = "client" ];
