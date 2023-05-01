@@ -242,6 +242,12 @@ public class GamePanel extends JPanel implements IClientEvents {
             readyCheck.setVisible(false);
             //buttonsPanel.setVisible(true);
 
+            /*
+             * UCID: kl63
+             * DATE 5/1/23
+             * COMMENTS: Code for showing visibility of the button. If the player is a spectator their choice button will not show.
+             * Else is not spectator their choice button will show.
+             */
             if (Client.INSTANCE.getIsSpectator()) {
                 buttonsPanel.setVisible(false);
                 /*rockButton.setVisible(false);

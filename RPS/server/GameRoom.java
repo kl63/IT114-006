@@ -223,18 +223,17 @@ public class GameRoom extends Room {
         players.values().stream().filter(p -> p.isAway() == true).forEach(p -> { // EDITED 4/25 AWAY PLAYER
             p.setSkip(true);
         });
+        /*UCID: kl63
+         * DATE: 5/1/23
+         * COMMENT: numReadyCount is a count for who are ready and made a choice. 
+         * This way the others aren't counted for the battle (game logic)
+         */
 
         long numReadyCount = players.values().stream().filter(p -> p.isReady() && p.getChoice() != null && !p.isAway()
-                && !p.isOut() && !p.isSkip() && !p.isSpectator()).count(); //SPEC HERE
-        /*
-         * UCID#: 31555276
-         * DATE: 4/4/23
-         * COMMENT: Logic for calculating winners (i.e., Player 1 vs Player 2 vs Player
-         * 3 vs Player
-         * 1) Each player is compared against the following player; the last player is
-         * compared against
-         * the first to complete the cycle.
-         */
+                && !p.isOut() && !p.isSkip() && !p.isSpectator()).count(); 
+
+
+        
         List<ServerPlayer> numReady = (List<ServerPlayer>) players.values().stream().filter(p -> p.isReady()
                 && p.getChoice() != null && !p.isAway() && !p.isOut() && !p.isSkip() && !p.isSpectator()).toList(); //SPEC HERE
         logger.info(String.format("TESTING COUNT:  %s", numReady.size()));

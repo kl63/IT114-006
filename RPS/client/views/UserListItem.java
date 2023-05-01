@@ -20,6 +20,10 @@ public class UserListItem extends JPanel {
     private boolean isAway = false; // EDITED 4/24
     private boolean isSpectator = false; // EDITED 4/24
     JEditorPane text = new JEditorPane("text/plain", "");
+    /*UCID: kl63
+     * DATE: 5/1/23
+     * COMMENTS: Creating of the button for Away and Spectator
+     */
     JButton awayButton = new JButton(); // EDITED 4/24
     JButton awayIndicator = new JButton("A"); // EDITED 4/25
     JButton spectatorButton = new JButton(); // EDITED 4/28
@@ -28,8 +32,12 @@ public class UserListItem extends JPanel {
     public UserListItem(String clientName, long clientId) {
         this.clientId = clientId;
         this.clientName = clientName;
+        /*UCID: kl63
+         * DATE: 5/1/23
+         * COMMENTS: Button and sizing for Away and Spectator
+         */
         awayIndicator.setEnabled(false); // EDITED 4/25
-        awayIndicator.setVisible(false); // EDITED 4/25
+        awayIndicator.setVisible(false); // EDITED 4/25 
         awayIndicator.setBackground(Color.YELLOW); // EDITED 4/25
         spectatorIndicator.setEnabled(false); // EDITED 4/28
         spectatorIndicator.setVisible(false); // EDITED 4/28
