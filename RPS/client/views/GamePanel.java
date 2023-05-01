@@ -26,10 +26,17 @@ public class GamePanel extends JPanel implements IClientEvents {
     GamePanel self;
     JPanel gridLayout;
     JPanel readyCheck;
+    JPanel buttonsPanel = new JPanel(new FlowLayout());
+    JButton rockButton = new JButton("ROCK (R)");
+    JButton paperButton = new JButton("PAPER (P)");
+    JButton scissorsButton = new JButton("SCISSORS (S)");
+    JButton awayButton = new JButton("AWAY"); // EDITED 4/21
+    JButton skipButton = new JButton("SKIP");
     TimedEvent currentTimer; // EDITED 4/18
     Phase currentPhase; // EDITED 4/18
     JLabel timeLabel = new JLabel(""); // EDITED 4/19
     UserListPanel ulp; // EDITED 4/19
+    private boolean isSpectator = false; // EDITED 4/27
 
     public GamePanel() {
         gridLayout = new JPanel();
@@ -47,6 +54,57 @@ public class GamePanel extends JPanel implements IClientEvents {
         timeLabel.setPreferredSize(td); // EDITED 4/19
         this.add(timeLabel); // EDITED 4/19
 
+        // JPanel buttonsPanel = new JPanel(new FlowLayout()); //MOVED 4/27
+
+        JButton rockButton = new JButton("ROCK (R)");
+        JButton paperButton = new JButton("PAPER (P)");
+        JButton scissorsButton = new JButton("SCISSORS (S)");
+        JButton awayButton = new JButton("AWAY"); // EDITED 4/21
+        JButton skipButton = new JButton("SKIP");
+        buttonsPanel.add(rockButton);
+        buttonsPanel.add(paperButton);
+        buttonsPanel.add(scissorsButton);
+        buttonsPanel.add(skipButton);
+        buttonsPanel.add(awayButton); // EDITED 4/24
+        rockButton.addActionListener((event) -> {
+            try {
+                Client.INSTANCE.sendChoice("R");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        paperButton.addActionListener((event) -> {
+            try {
+                Client.INSTANCE.sendChoice("P");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        scissorsButton.addActionListener((event) -> {
+            try {
+                Client.INSTANCE.sendChoice("S");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        skipButton.addActionListener((event) -> {
+            try {
+                Client.INSTANCE.sendSkip();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+        awayButton.addActionListener((event) -> { // EDITED 4/21
+            try {
+                Client.INSTANCE.sendAwayStatus();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
+
+        buttonsPanel.setPreferredSize(new Dimension(200, 70));
+        this.add(buttonsPanel, BorderLayout.WEST);
+
     }
 
     public void setUserListPanel(UserListPanel ulp) {
@@ -61,7 +119,7 @@ public class GamePanel extends JPanel implements IClientEvents {
             tf.setName("readyText");
             readyCheck.add(tf, BorderLayout.CENTER);
             JButton jb = new JButton("Ready");
-            
+
             jb.addActionListener((event) -> {
                 if (!Client.INSTANCE.isCurrentPhase(Phase.READY)) {
                     return;
@@ -70,10 +128,11 @@ public class GamePanel extends JPanel implements IClientEvents {
                     Client.INSTANCE.sendReadyStatus();
                 } catch (IOException e) {
                     e.printStackTrace();
-                }   
+                }
             });
-           
+
             readyCheck.add(jb, BorderLayout.SOUTH);
+
             JButton spectatorButton = new JButton(" Spectator Mode");
             spectatorButton.addActionListener((event) -> {
                 if (!Client.INSTANCE.isCurrentPhase(Phase.READY)) {
@@ -83,17 +142,12 @@ public class GamePanel extends JPanel implements IClientEvents {
                     Client.INSTANCE.sendSpectatorStatus();
                 } catch (IOException e) {
                     e.printStackTrace();
-                }   
+                }
             });
             readyCheck.add(spectatorButton, BorderLayout.NORTH);
 
-            }
         }
-    
-            
-
-        
-    
+    }
 
     // Although we must implement all of these methods, not all of them may be
     // applicable to this panel
@@ -183,58 +237,75 @@ public class GamePanel extends JPanel implements IClientEvents {
         logger.info(Constants.ANSI_BRIGHT_BLUE + String.format("Received phase %s", phase) + Constants.ANSI_RESET);
         if (phase == Phase.READY) {
             readyCheck.setVisible(true);
+            buttonsPanel.setVisible(false);
         } else if (phase == Phase.PICKING) { // EDITED 4/10
             readyCheck.setVisible(false);
-            JPanel buttonsPanel = new JPanel(new FlowLayout());
+            //buttonsPanel.setVisible(true);
 
-            JButton rockButton = new JButton("ROCK (R)");
-            JButton paperButton = new JButton("PAPER (P)");
-            JButton scissorsButton = new JButton("SCISSORS (S)");
-            JButton awayButton = new JButton("AWAY");  //EDITED 4/21
-            JButton skipButton = new JButton("SKIP");
-            buttonsPanel.add(rockButton);
-            buttonsPanel.add(paperButton);
-            buttonsPanel.add(scissorsButton);
-            buttonsPanel.add(skipButton);
-            buttonsPanel.add(awayButton); // EDITED 4/24
-            rockButton.addActionListener((event) -> {
-                try {
-                    Client.INSTANCE.sendChoice("R");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            paperButton.addActionListener((event) -> {
-                try {
-                    Client.INSTANCE.sendChoice("P");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            scissorsButton.addActionListener((event) -> {
-                try {
-                    Client.INSTANCE.sendChoice("S");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            skipButton.addActionListener((event) -> {
-                try {
-                    Client.INSTANCE.sendSkip();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            awayButton.addActionListener((event) -> { //EDITED 4/21
-                try {
-                    Client.INSTANCE.sendAwayStatus();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-            
-            buttonsPanel.setPreferredSize(new Dimension(200, 70));
-            this.add(buttonsPanel, BorderLayout.WEST);
+            if (Client.INSTANCE.getIsSpectator()) {
+                buttonsPanel.setVisible(false);
+                /*rockButton.setVisible(false);
+                paperButton.setVisible(false);
+                scissorsButton.setVisible(false);
+                skipButton.setVisible(false);
+                awayButton.setVisible(false);*/
+            }else{
+                buttonsPanel.setVisible(true);
+            }
+
+            /*
+             * JPanel buttonsPanel = new JPanel(new FlowLayout());
+             * 
+             * JButton rockButton = new JButton("ROCK (R)");
+             * JButton paperButton = new JButton("PAPER (P)");
+             * JButton scissorsButton = new JButton("SCISSORS (S)");
+             * JButton awayButton = new JButton("AWAY"); //EDITED 4/21
+             * JButton skipButton = new JButton("SKIP");
+             * buttonsPanel.add(rockButton);
+             * buttonsPanel.add(paperButton);
+             * buttonsPanel.add(scissorsButton);
+             * buttonsPanel.add(skipButton);
+             * buttonsPanel.add(awayButton); // EDITED 4/24
+             * rockButton.addActionListener((event) -> {
+             * try {
+             * Client.INSTANCE.sendChoice("R");
+             * } catch (IOException e) {
+             * e.printStackTrace();
+             * }
+             * });
+             * paperButton.addActionListener((event) -> {
+             * try {
+             * Client.INSTANCE.sendChoice("P");
+             * } catch (IOException e) {
+             * e.printStackTrace();
+             * }
+             * });
+             * scissorsButton.addActionListener((event) -> {
+             * try {
+             * Client.INSTANCE.sendChoice("S");
+             * } catch (IOException e) {
+             * e.printStackTrace();
+             * }
+             * });
+             * skipButton.addActionListener((event) -> {
+             * try {
+             * Client.INSTANCE.sendSkip();
+             * } catch (IOException e) {
+             * e.printStackTrace();
+             * }
+             * });
+             * awayButton.addActionListener((event) -> { //EDITED 4/21
+             * try {
+             * Client.INSTANCE.sendAwayStatus();
+             * } catch (IOException e) {
+             * e.printStackTrace();
+             * }
+             * });
+             *
+             *
+             * buttonsPanel.setPreferredSize(new Dimension(200, 70));
+             * this.add(buttonsPanel, BorderLayout.WEST);
+             */
 
         }
 
@@ -250,18 +321,16 @@ public class GamePanel extends JPanel implements IClientEvents {
             ulp.setPointsForPlayer(clientId, points);
         }
     }
+
     @Override
-    public void onReceiveAway(long clientId, boolean isAway) { //EDITED 4/24
+    public void onReceiveAway(long clientId, boolean isAway) { // EDITED 4/24
         logger.info("onReceiveAway triggered for clientId: " + clientId + ", away status: " + isAway);
         ulp.setAwayPlayer(clientId, isAway);
         if (isAway) {
-            ulp.setSpectatorPlayer(clientId, true); 
-            ulp.setSpectatorPlayer(clientId, false); 
+            ulp.setSpectatorPlayer(clientId, true);
+            ulp.setSpectatorPlayer(clientId, false);
         }
     }
-        
-    
-
 
     @Override
     public void onReceiveOut(long clientId) {
@@ -270,14 +339,12 @@ public class GamePanel extends JPanel implements IClientEvents {
         // 'onReceiveOut'");
     }
 
-    public void onReceiveSpectator(long clientId, boolean isSpectator) { //EDITED 4/24
+    public void onReceiveSpectator(long clientId, boolean isSpectator) { // EDITED 4/24
+        
         logger.info("onReceiveSpectator triggered for clientId: " + clientId + ", isSpectator: " + isSpectator);
         if (ulp != null) {
             ulp.setSpectatorPlayer(clientId, isSpectator);
         }
+        
     }
 }
-
-
-
-

@@ -37,6 +37,7 @@ public enum Client {
     private long myClientId = Constants.DEFAULT_CLIENT_ID;
     private static Logger logger = Logger.getLogger(Client.class.getName());
     private boolean isAway = false; // EDITED 4/19
+    private boolean isSpectator = false; // EDITED 4/27
 
     // private Hashtable<Long, String> userList = new Hashtable<Long, String>();
     // //EDITED 4/4
@@ -57,11 +58,14 @@ public enum Client {
     }
 
     public boolean isAway() { // EDITED 4/19
-        return isAway ;
+        return isAway;
     }
 
     public void setAway(boolean isAway) { // EDITED 4/19
         this.isAway = isAway;
+    }
+    public boolean getIsSpectator(){ //EDITED 4/28
+        return isSpectator;
     }
 
     public boolean isCurrentPhase(Phase phase) { // EDITED 4/4
@@ -178,6 +182,7 @@ public enum Client {
         out.writeObject(p);
 
     }
+
     public void sendSpectatorStatus() throws IOException { // EDITED 4/24
         Payload p = new Payload();
         p.setPayloadType(PayloadType.SPECTATOR);
@@ -422,7 +427,7 @@ public enum Client {
                 listeners.forEach(l -> l.onReceiveOut(p.getClientId()));
                 break;
 
-                case AWAY: // EDITED 4/24
+            case AWAY: // EDITED 4/24
                 if (players.containsKey(p.getClientId())) {
                     players.get(p.getClientId()).setAway(isAway);
                     if (isAway) {
@@ -432,6 +437,24 @@ public enum Client {
                 }
                 listeners.forEach(l -> l.onReceiveAway(p.getClientId(), isAway));
                 break;
+            case SPECTATOR: // EDITED 4/27
+            isSpectator = p.getClientId() == myClientId;
+            if(isSpectator){
+                logger.info(Constants.ANSI_GREEN + String.format("Player %s is spectator", getClientNameById(p.getClientId()))
+                        + Constants.ANSI_RESET);
+            }else {
+                logger.info(Constants.ANSI_GREEN + getClientNameById(p.getClientId()) + " is spectator"
+                                + Constants.ANSI_RESET);
+
+            }
+                //if (players.containsKey(p.getClientId())) {
+                    //players.get(p.getClientId()).setSpectator(true);
+                //}
+                //listeners.forEach(l -> l.onReceiveReady(p.getClientId()));
+                // long count = players.values().stream().filter(Player::isReady).count();
+                listeners.forEach(l -> l.onReceiveSpectator(p.getClientId(), isSpectator));
+                break;
+            
 
             default:
                 logger.warning(Constants.ANSI_RED + String.format("Unhandled Payload type: %s", p.getPayloadType())

@@ -157,7 +157,7 @@ public class UserListPanel extends JPanel {
             if (c instanceof UserListItem) {
                 UserListItem u = (UserListItem) c;
                 if (u.getClientId() == clientId) {
-                    u.setSpectator(isSpectator);
+                    u.setSpectator(clientId);
                     break;
                 }
             }

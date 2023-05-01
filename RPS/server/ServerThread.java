@@ -117,13 +117,15 @@ public class ServerThread extends Thread {
         p.setClientId(clientId);
         return send(p);
     }
-    public boolean sendAwayStatus(long clientId) { //EDITED 4/21
+
+    public boolean sendAwayStatus(long clientId) { // EDITED 4/21
         Payload p = new Payload();
         p.setPayloadType(PayloadType.AWAY);
         p.setClientId(clientId);
         return send(p);
     }
-    public boolean sendSpectatorStatus(long clientId) { //EDITED 4/24
+
+    public boolean sendSpectatorStatus(long clientId) { // EDITED 4/24
         Payload p = new Payload();
         p.setPayloadType(PayloadType.SPECTATOR);
         p.setClientId(clientId);
@@ -231,6 +233,7 @@ public class ServerThread extends Thread {
             cleanup();
         }
     }
+
     /*
      * UCID#: 31555276
      * DATE: 4/4/23
@@ -266,7 +269,7 @@ public class ServerThread extends Thread {
             /*
              * UCID#: 31555276
              * DATE: 4/4/23
-            */
+             */
 
             /*
              * Payload for available rooms to join.
@@ -310,7 +313,6 @@ public class ServerThread extends Thread {
              */
             case CHOICE:
                 try {
-                    
 
                     ((GameRoom) currentRoom).setChoice(p.getChoice(), myClientId);
                 } catch (Exception e) {
@@ -321,7 +323,7 @@ public class ServerThread extends Thread {
             /*
              * UCID#: 31555276
              * DATE: 4/4/23
-            */
+             */
             /*
              * Payload for skipping a turn
              */
@@ -334,7 +336,7 @@ public class ServerThread extends Thread {
                     e.printStackTrace();
                 }
                 break;
-                case AWAY: //EDITED 4/21
+            case AWAY: // EDITED 4/21
                 try {
                     ((GameRoom) currentRoom).setAway(this);
                     ;
@@ -342,8 +344,8 @@ public class ServerThread extends Thread {
                     logger.severe(String.format("There was a problem during setAway %s", e.getMessage()));
                     e.printStackTrace();
                 }
-                break; 
-                case SPECTATOR: //EDITED 4/24
+                break;
+            case SPECTATOR: // EDITED 4/24
                 try {
                     ((GameRoom) currentRoom).setSpectator(this);
                 } catch (Exception e) {

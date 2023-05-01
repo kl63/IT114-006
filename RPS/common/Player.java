@@ -6,7 +6,7 @@ public class Player {
     private String choice; //EDITED 3/28
     private boolean isSkip = false; //EDITED 3/31
     private boolean isAway = false; //EDITED 4/21
-    private boolean isSpectator; //EDITED 4/24
+    private boolean isSpectator = false; //EDITED 4/24
 
     public void setAway(boolean isAway){ //EDITED 4/21
          this.isAway = isAway;
