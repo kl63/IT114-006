@@ -1,3 +1,3 @@
-# IT114-006
-# Kevin Lin
-# I'm a Web & Information Systems Major.
+# Welcome to my IT114-006 Repository!
+
+This repository contains projects and code samples created for my Advanced Programming for Information Technology class. In this repository, you'll find projects I've developed as part of my coursework, personal projects I've created. This repo also conatins a Rock Paper Sissors game created using Java. The rock-paper-scissors game is a classic game that has been enjoyed by people of all ages for generations. In this repository, you'll find an implementation of the game using various programming concepts and techniques.Don't hesitate to reach out if you have any questions or feedback - I'm always happy to connect with other developers and learn from their experiences. Thank you for visiting my repository, and happy coding!
